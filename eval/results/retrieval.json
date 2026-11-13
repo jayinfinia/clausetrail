@@ -24,7 +24,7 @@
       "question_hit_rate": 89.5,
       "question_all_spans_rate": 78.1,
       "span_recall": 78.3,
-      "median_chars_sent": 19583.0,
+      "median_chars_sent": 19589.0,
       "median_passages_sent": 34.0
     },
     "clausetrail_v1": {
@@ -38,8 +38,8 @@
       "question_hit_rate": 82.2,
       "question_all_spans_rate": 71.3,
       "span_recall": 69.7,
-      "median_chars_sent": 19812.5,
-      "median_passages_sent": 26.0
+      "median_chars_sent": 19815.0,
+      "median_passages_sent": 26.5
     },
     "opening_3000_chars": {
       "question_hit_rate": 85.7,
@@ -381,5 +381,5 @@
       "random_passages": 0.0
     }
   ],
-  "seconds": 29.2
+  "seconds": 26.7
 }

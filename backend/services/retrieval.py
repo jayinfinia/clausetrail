@@ -40,6 +40,10 @@ def retrieve(question,records,limit=40,budget=20000,per_doc_limit=None,lead_char
         name=str(r.approved.get('counterparty',{}).get('value') or r.proposals.get('counterparty',{}).get('value') or '')
         key=set(terms(name)) - {'fictional','example','demo','labs','lab','research'}
         distinctive={t for t in key & q if len(t)>=3 and sum(t in d for d in doc_terms.values())<=2}
+        # Before a counterparty is extracted, a distinctive file-name word that also occurs in the document's own
+        # text names it too ("the Lark MTA" for "Lark Fictional Biosciences - Material Transfer Agreement.docx").
+        stem=set(terms(re.sub(r'\.[A-Za-z0-9]{1,5}$','',r.filename))) - {'fictional','example','demo','labs','lab','research','scanned','copy','final','signed','executed','draft'}
+        distinctive|={t for t in stem & q if len(t)>=3 and t in doc_terms[r.id] and sum(t in d for d in doc_terms.values())<=2}
         if (key and key<=q) or distinctive or r.filename.casefold() in question.casefold():named_ids.add(r.id)
     if named_ids:
         named_ids.update(r.id for r in records if r.parent_id in named_ids)

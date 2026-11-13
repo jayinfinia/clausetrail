@@ -72,6 +72,14 @@ def open_when_ready(url):
 def main():
     load_env()
     build_frontend()
+    if not Path('Sample files').exists():
+        try:
+            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+            from scripts.make_sample_files import make
+            make('Sample files')
+            print('Created the "Sample files" folder: fictional Word, PDF, scanned PDF and Excel files to drag into the app.')
+        except Exception as exc:  # samples are a convenience; never block startup
+            print(f'Could not create sample files ({type(exc).__name__}).')
     os.environ.setdefault('DEMO_MODE', 'true')
     if '--private' in sys.argv:
         os.environ['PRIVATE_LOCAL'] = 'true'

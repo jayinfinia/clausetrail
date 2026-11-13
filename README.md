@@ -49,6 +49,8 @@ You need [Python 3.12 or newer](https://www.python.org/downloads/). Nothing else
 2. **Double-click** `Clausetrail.command` (macOS) or `Clausetrail.bat` (Windows). The first start takes about a minute to set up; later starts take a few seconds. Your browser opens to Clausetrail.
 3. **Sign in** as Alex Morgan and choose **Add agreements → Load fictional examples**.
 
+The first start also creates a **Sample files** folder next to the launcher with fictional agreements written as real clauses: a Word MTA, a text PDF services agreement, a scanned PDF NDA (read with OCR) and an Excel tracker. Drag them onto **Add agreements** to see how Clausetrail handles the formats people actually receive.
+
 Then try:
 
 - **Review queue**: open an agreement, check each proposed value against its highlighted source passage, and approve.

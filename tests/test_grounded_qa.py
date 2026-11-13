@@ -301,6 +301,16 @@ class NamedAgreementTests(unittest.TestCase):
     def test_distinctive_counterparty_word_names_agreements(self):
         hits,_=retrieve('Compare the return obligations in the Elm and Fern MTAs.',self.corpus())
         self.assertEqual({h['filename'] for h in hits},{'05-mta-return.txt','06-mta-trigger.txt'})
+    def test_file_name_word_names_an_agreement_before_extraction(self):
+        from types import SimpleNamespace
+        def doc(rid,name,text):
+            return SimpleNamespace(id=rid,filename=name,blocks=[{'id':'1','locator':'Page 1','text':text}],source_version='v',digest=rid,revision=1,executed=False,parent_id=None,approved={},proposals={})
+        lark=doc('a','Lark Fictional Biosciences - Material Transfer Agreement.docx','Lark Fictional Biosciences transfers the cell line. Recipient may transfer only with prior written consent.')
+        willow=doc('b','Willow Example Health - Mutual NDA (scanned).pdf','Willow Example Health and the recipient keep information confidential. The recipient may share with advisers.')
+        hits,_=retrieve('Can the recipient give the Lark cell line to another lab?',[willow,lark])
+        self.assertEqual({h['agreement_id'] for h in hits},{'a'})
+        hits,_=retrieve('Can the recipient share information?',[willow,lark])  # no name: both stay in scope
+        self.assertEqual({h['agreement_id'] for h in hits},{'a','b'})
     def test_common_words_do_not_name_an_agreement(self):
         # "materials" is in Fern Example Materials but also in every document's text.
         hits,_=retrieve('What can the recipient use the materials for?',self.corpus())

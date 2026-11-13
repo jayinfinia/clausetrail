@@ -19,7 +19,7 @@ import httpx
 
 from backend.config import FIELDS
 from backend.domain import framework as fw
-from backend.services.qa_provider import api_error_reason
+from backend.services.qa_provider import api_error_reason, structured_reply, tool_instruction
 
 API_URL = 'https://api.anthropic.com/v1/messages'
 MAX_CHARS = 60_000
@@ -113,8 +113,8 @@ def call_claude(text):
     key = os.getenv('ANTHROPIC_API_KEY')
     if not key:
         raise TaggingUnavailable('ANTHROPIC_API_KEY is not set')
-    body = {'model': model(), 'max_tokens': 2500, 'system': system_prompt(), 'tools': [TOOL],
-            'tool_choice': {'type': 'tool', 'name': 'record_agreement'}, 'messages': [{'role': 'user', 'content': text}]}
+    body = {'model': model(), 'max_tokens': 2500, 'system': system_prompt() + tool_instruction('record_agreement'), 'tools': [TOOL],
+            'tool_choice': {'type': 'auto'}, 'messages': [{'role': 'user', 'content': text}]}
     try:
         with httpx.Client(timeout=httpx.Timeout(120, connect=10), trust_env=False, follow_redirects=False) as c:
             r = c.post(API_URL, json=body, headers={'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'})
@@ -122,9 +122,9 @@ def call_claude(text):
         raise TaggingUnavailable('Could not reach Claude')
     if r.status_code != 200:
         raise TaggingUnavailable(f'Claude request failed ({r.status_code}){api_error_reason(r)}')  # never log request bodies
-    for part in r.json().get('content', []):
-        if part.get('type') == 'tool_use':
-            return part.get('input') or {}
+    result = structured_reply(r.json().get('content'), 'record_agreement')
+    if result is not None:
+        return result
     raise TaggingUnavailable('Claude returned no tags')
 
 

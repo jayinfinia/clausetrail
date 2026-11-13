@@ -24,6 +24,25 @@ def api_error_reason(response):
     message = re.sub(r'\s+', ' ', message).strip()[:160]
     return f': {message}' if message else ''
 
+def tool_instruction(name):
+    """Newer Claude models reject a forced tool_choice, so the request uses tool_choice auto plus this instruction."""
+    return f'\n\nRespond only by calling the `{name}` tool exactly once with your complete response. Do not reply in plain text.'
+
+def structured_reply(content, name):
+    """The input of the named tool call; failing that, a JSON object written as plain text (with or without a code fence)."""
+    for part in content or []:
+        if part.get('type')=='tool_use' and part.get('name')==name and isinstance(part.get('input'),dict):
+            return part['input']
+    text=' '.join(part.get('text','') for part in content or [] if part.get('type')=='text')
+    match=re.search(r'\{.*\}',text,re.S)
+    if match:
+        try:
+            value=json.loads(match.group())
+            if isinstance(value,dict):return value
+        except ValueError:
+            pass
+    return None
+
 class ModelUnavailable(Exception):
     pass
 
@@ -163,8 +182,8 @@ def _claude_chat(system,payload,schema):
     if not status['ready']:
         raise ModelUnavailable(status['reason'])
     tool={'name':'respond','description':'Return the structured response.','input_schema':_inline_refs(schema)}
-    body={'model':model_name(),'max_tokens':2000,'temperature':0,'system':system,'tools':[tool],
-          'tool_choice':{'type':'tool','name':'respond'},
+    body={'model':model_name(),'max_tokens':2000,'system':system+tool_instruction('respond'),'tools':[tool],
+          'tool_choice':{'type':'auto'},
           'messages':[{'role':'user','content':json.dumps(payload,ensure_ascii=False)}]}
     _record_call()
     try:
@@ -174,7 +193,7 @@ def _claude_chat(system,payload,schema):
         raise ModelUnavailable('Could not reach Claude. Check the network and retry.') from None
     if response.status_code!=200:
         raise ModelUnavailable(f'Claude request failed ({response.status_code}){api_error_reason(response)}')  # never log request bodies
-    for part in response.json().get('content',[]):
-        if part.get('type')=='tool_use' and isinstance(part.get('input'),dict):
-            return part['input']
-    raise ModelResponseError('Claude returned no structured response')
+    result=structured_reply(response.json().get('content'),'respond')
+    if result is None:
+        raise ModelResponseError('Claude returned no structured response')
+    return result

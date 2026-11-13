@@ -48,11 +48,22 @@ class ClaudeProviderTests(unittest.TestCase):
             url = post.call_args.args[0]; body = post.call_args.kwargs['json']
             self.assertEqual(url, 'https://api.anthropic.com/v1/messages')
             self.assertNotIn('$ref', str(body['tools'][0]['input_schema']))
-            self.assertEqual(body['tool_choice'], {'type': 'tool', 'name': 'respond'})
+            self.assertEqual(body['tool_choice'], {'type': 'auto'})  # forced tool_choice is rejected by newer models
+            self.assertIn('`respond` tool', body['system'])
             self.assertFalse(qa_provider.readiness()['ready'])  # limit of 3 reached
             with self.assertRaises(qa_provider.ModelUnavailable):
                 qa_provider.chat('system', {}, schema)
             self.assertEqual(post.call_count, 3)
+
+    def test_plain_text_json_reply_is_accepted(self):
+        text = MagicMock(); text.status_code = 200
+        text.json.return_value = {'content': [{'type': 'text', 'text': 'Here it is:\n```json\n{"relevant_source_ids": [], "claims": []}\n```'}]}
+        with patch.dict(os.environ, ENV), patch('httpx.Client.post', return_value=text):
+            self.assertEqual(qa_provider.chat('s', {}, {'type': 'object'}), {'relevant_source_ids': [], 'claims': []})
+        prose = MagicMock(); prose.status_code = 200; prose.json.return_value = {'content': [{'type': 'text', 'text': 'No.'}]}
+        with patch.dict(os.environ, ENV), patch('httpx.Client.post', return_value=prose):
+            with self.assertRaises(qa_provider.ModelResponseError):
+                qa_provider.chat('s', {}, {'type': 'object'})
 
     def test_http_error_shows_only_anthropic_reason(self):
         bad = MagicMock(); bad.status_code = 400

@@ -43,11 +43,11 @@ def call(label, body):
 tag_model = tagging.model()
 qa_model = os.getenv('CLAUDE_QA_MODEL', 'claude-sonnet-5-5')
 call(f'1. Plain message ({tag_model})', {'model': tag_model, 'max_tokens': 16, 'messages': [{'role': 'user', 'content': 'Say OK.'}]})
-call('2. Tagging request', {'model': tag_model, 'max_tokens': 800, 'system': tagging.system_prompt(), 'tools': [tagging.TOOL],
-                            'tool_choice': {'type': 'tool', 'name': 'record_agreement'},
+call('2. Tagging request', {'model': tag_model, 'max_tokens': 800, 'system': tagging.system_prompt() + qa_provider.tool_instruction('record_agreement'), 'tools': [tagging.TOOL],
+                            'tool_choice': {'type': 'auto'},
                             'messages': [{'role': 'user', 'content': 'File name: x.txt\nFolder: (none)\n\nPASSAGES:\n[p1 | Line 1]\nAgreement type: CDA\n'}]})
-call(f'3. Answer request ({qa_model})', {'model': qa_model, 'max_tokens': 400, 'temperature': 0, 'system': 'Return the structured response.',
+call(f'3. Answer request ({qa_model})', {'model': qa_model, 'max_tokens': 400, 'system': 'Return the structured response.' + qa_provider.tool_instruction('respond'),
                                          'tools': [{'name': 'respond', 'description': 'Return the structured response.',
                                                     'input_schema': qa_provider._inline_refs(Draft.model_json_schema())}],
-                                         'tool_choice': {'type': 'tool', 'name': 'respond'},
+                                         'tool_choice': {'type': 'auto'},
                                          'messages': [{'role': 'user', 'content': '{"question": "test", "documents": []}'}]})

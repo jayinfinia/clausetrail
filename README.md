@@ -26,8 +26,9 @@ Evaluated on the official test split of [CUAD](https://www.atticusprojectai.org/
 | Quote check: altered or borrowed quotes accepted | **0 of 6,461** (genuine quotes rejected: 0 of 4,862) |
 | Redaction: injected SSNs, tax IDs, card and account numbers, birth dates caught | **1,326 of 1,326**, with 9 flags on 4.8M characters of clean text, all real account or tax numbers |
 | Default extractor on real contracts | Abstains on 99.7% of fields instead of guessing |
+| End to end with a local 7B model (qwen2.5:7b, 40 questions) | Correctly declined **85%** of questions whose clause is absent; answered **60%** of answerable questions with a citation on the annotated clause |
 
-End-to-end answer accuracy needs a local model; the harness is included (`python -m eval.cuad_eval live`) and results are pending.
+The end-to-end sample is small (95% intervals of roughly ±20 points); the main gap is recall after retrieval, discussed in the evaluation doc.
 
 ## Features
 

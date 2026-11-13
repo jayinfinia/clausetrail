@@ -32,7 +32,8 @@ python -m eval.cuad_eval retrieval --cuad .local/cuad/data --split dev     # tun
 | Redaction (rules only) | Injected SSNs, tax IDs, card and account numbers, birth dates caught | **100%** (1,326 values, 13 layouts) |
 | Redaction (rules only) | Flags on 4.8 million characters of clean contract text | 9 flags, all real bank, routing or tax numbers on manual review |
 | Default extractor | Fields it proposes on real contracts | Abstains on 99.7% of fields, by design |
-| End-to-end answers | Needs a local model | Harness included; results pending (see below) |
+| End-to-end answers (qwen2.5:7b, 40 questions) | Answerable questions answered with a citation on the annotated clause | **60%** (12 of 20) |
+| End-to-end answers (qwen2.5:7b, 40 questions) | Questions with no such clause where the system correctly declined | **85%** (17 of 20) |
 
 ## 1. Retrieval
 
@@ -111,16 +112,33 @@ Result: **1,326 of 1,326 caught**, with no oversized spans. The first run caught
 
 Without a model, the importer only reads explicit `Label: value` lines. On the 102 test contracts it proposed 3 values out of 1,122 field slots (99.7% abstention), all effective dates, and marked all 3 *ambiguous* rather than guessing (two of the three evidence lines matched CUAD's annotation). That is the intended behavior: on real contracts the deterministic path stays silent instead of inventing values, and model-assisted tagging with quote grounding (`backend/tagging.py`) fills the fields as proposals for a reviewer.
 
-## 5. End-to-end answers (needs a local model)
+## 5. End-to-end answers (local model)
 
-This environment had no local model, so end-to-end accuracy has **not** been measured yet. The harness samples answerable and unanswerable CUAD questions in equal numbers and runs the full pipeline: retrieval, structured synthesis, quote check, support check.
+The harness samples answerable and unanswerable CUAD test questions in equal numbers and runs the full pipeline: retrieval, structured synthesis, quote check, support check. First run: **qwen2.5:7b** (4.7 GB, 4-bit) through Ollama on an Apple Silicon MacBook Pro, 40 questions, seed 20261113, no errors.
+
+| Metric | Result | 95% interval (Wilson) |
+|---|---|---|
+| Answerable questions answered (20) | 70% (14) | 48 to 85% |
+| Answerable questions answered with a citation on the lawyer-annotated clause | 60% (12) | 39 to 78% |
+| Questions with no such clause where the system declined (20) | 85% (17) | 64 to 95% |
+| Citations that land on the annotated clause | 60% | |
+| Median time per question | 37.5 s (laptop CPU/GPU) | |
+
+**Reading it.**
+
+- **Declining is the strong side.** On 17 of 20 questions where CUAD says the contract has no such clause, the system said so rather than inventing one. The 3 that answered need manual review: a supported claim about a related clause (for example a general termination right when asked about termination for convenience) is counted here as a failure.
+- **Recall is the weak side.** 6 of 20 answerable questions ended as "insufficient evidence". Since retrieval reaches the annotated clause about 90% of the time (section 1), most of that loss happens after retrieval: the 7B model either did not propose a claim or its claim failed the quote or support check. That trade is deliberate (an abstention is safer than an unsupported answer), but it is the main thing to improve.
+- **Citation precision is a lower bound.** CUAD annotates the most relevant span; a correct citation of a related clause elsewhere counts as a miss.
+- **Small sample.** 40 questions gives wide intervals (shown above). A 200-question run takes about 2 hours at this speed and is the next measurement.
+
+Next experiments, each measured the same way: a larger local model, splitting the support check from claim drafting across two different models so their errors are less correlated, and embedding retrieval for the vocabulary-mismatch categories in section 1.
 
 ```sh
 ollama pull qwen2.5:7b
 QA_MODEL=qwen2.5:7b python -m eval.cuad_eval live --cuad .local/cuad/data --limit 200
 ```
 
-It reports:
+To reproduce or extend it, the harness reports:
 
 - **Answered rate** on questions with an annotated answer, and the share answered with at least one citation on the annotated span.
 - **Correct abstention rate** on questions CUAD marks as having no answer in the contract.

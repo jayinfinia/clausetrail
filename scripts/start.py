@@ -69,19 +69,24 @@ def open_when_ready(url):
             time.sleep(0.5)
 
 
-load_env()
-build_frontend()
-os.environ.setdefault('DEMO_MODE', 'true')
-if '--private' in sys.argv:
-    os.environ['PRIVATE_LOCAL'] = 'true'
-    os.environ.setdefault('DATA_DIR', '.local-private')
-    print('PRIVATE LOCAL COPY: real documents stay in .local-private/ on this computer. Do not share or deploy.')
-port = int(os.getenv('PORT') or free_port())
-os.environ.setdefault('APP_ORIGIN', f'http://localhost:{port}')
-url = os.environ['APP_ORIGIN']
-answers = 'Claude (fictional demo)' if os.getenv('QA_PROVIDER', '').lower() == 'claude' and os.getenv('ANTHROPIC_API_KEY') and '--private' not in sys.argv \
-    else ('local model ' + (os.getenv('QA_MODEL') or os.getenv('OLLAMA_MODEL'))) if (os.getenv('QA_MODEL') or os.getenv('OLLAMA_MODEL')) else 'evidence search only (no AI model configured)'
-print(f'\n  Clausetrail is running at {url}\n  Answers: {answers}\n  Close this window or press Ctrl+C to stop.\n')
-if '--open' in sys.argv:
-    threading.Thread(target=open_when_ready, args=(url,), daemon=True).start()
-subprocess.run([sys.executable, '-m', 'uvicorn', 'backend.api.main:app', '--host', '127.0.0.1', '--port', str(port), '--log-level', 'warning'], check=True)
+def main():
+    load_env()
+    build_frontend()
+    os.environ.setdefault('DEMO_MODE', 'true')
+    if '--private' in sys.argv:
+        os.environ['PRIVATE_LOCAL'] = 'true'
+        os.environ.setdefault('DATA_DIR', '.local-private')
+        print('PRIVATE LOCAL COPY: real documents stay in .local-private/ on this computer. Do not share or deploy.')
+    port = int(os.getenv('PORT') or free_port())
+    os.environ.setdefault('APP_ORIGIN', f'http://localhost:{port}')
+    url = os.environ['APP_ORIGIN']
+    answers = 'Claude (fictional demo)' if os.getenv('QA_PROVIDER', '').lower() == 'claude' and os.getenv('ANTHROPIC_API_KEY') and '--private' not in sys.argv \
+        else ('local model ' + (os.getenv('QA_MODEL') or os.getenv('OLLAMA_MODEL'))) if (os.getenv('QA_MODEL') or os.getenv('OLLAMA_MODEL')) else 'evidence search only (no AI model configured)'
+    print(f'\n  Clausetrail is running at {url}\n  Answers: {answers}\n  Close this window or press Ctrl+C to stop.\n')
+    if '--open' in sys.argv:
+        threading.Thread(target=open_when_ready, args=(url,), daemon=True).start()
+    subprocess.run([sys.executable, '-m', 'uvicorn', 'backend.api.main:app', '--host', '127.0.0.1', '--port', str(port), '--log-level', 'warning'], check=True)
+
+
+if __name__ == '__main__':
+    main()

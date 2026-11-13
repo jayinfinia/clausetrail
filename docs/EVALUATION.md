@@ -129,7 +129,7 @@ The harness samples answerable and unanswerable CUAD test questions in equal num
 - **Declining is the strong side.** On 17 of 20 questions where CUAD says the contract has no such clause, the system said so rather than inventing one. The 3 that answered need manual review: a supported claim about a related clause (for example a general termination right when asked about termination for convenience) is counted here as a failure.
 - **Recall is the weak side.** 6 of 20 answerable questions ended as "insufficient evidence". Since retrieval reaches the annotated clause about 90% of the time (section 1), most of that loss happens after retrieval: the 7B model either did not propose a claim or its claim failed the quote or support check. That trade is deliberate (an abstention is safer than an unsupported answer), but it is the main thing to improve.
 - **Citation precision is a lower bound.** CUAD annotates the most relevant span; a correct citation of a related clause elsewhere counts as a miss.
-- **Small sample.** 40 questions gives wide intervals (shown above). A 200-question run takes about 2 hours at this speed and is the next measurement.
+- **Small sample.** 40 questions gives wide intervals (shown above). A 200-question run takes about 4 hours on the same laptop (this run averaged about 75 seconds per question including model loading) and is the next measurement.
 
 Next experiments, each measured the same way: a larger local model, splitting the support check from claim drafting across two different models so their errors are less correlated, and embedding retrieval for the vocabulary-mismatch categories in section 1.
 

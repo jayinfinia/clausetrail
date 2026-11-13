@@ -1,4 +1,12 @@
-"""Local-only, bounded Ollama chat transport. No cloud or proxy fallback."""
+"""Answer-model transports for grounded Q&A.
+
+Default: a local Ollama model (loopback only, no cloud or proxy fallback).
+
+Optional: Claude, for the fictional-data demo only. It is used when QA_PROVIDER=claude and
+ANTHROPIC_API_KEY are both set. The destination is fixed to api.anthropic.com in code,
+environment proxies are ignored, it is refused outright in a private local copy (real
+documents), and a daily call limit (QA_DAILY_LIMIT, default 200 model calls) caps spend.
+"""
 import json
 import os
 from urllib.parse import urlparse
@@ -10,8 +18,19 @@ class ModelUnavailable(Exception):
 class ModelResponseError(Exception):
     pass
 
+CLAUDE_URL='https://api.anthropic.com/v1/messages'
+
+def provider():
+    return 'claude' if os.getenv('QA_PROVIDER','').lower()=='claude' else 'ollama'
+
 def model_name():
+    if provider()=='claude':
+        return os.getenv('CLAUDE_QA_MODEL','claude-sonnet-5-5') if os.getenv('ANTHROPIC_API_KEY') else ''
     return os.getenv('QA_MODEL') or os.getenv('OLLAMA_MODEL') or ''
+
+def private_local():
+    return os.getenv('PRIVATE_LOCAL','false').lower()=='true'
+
 
 def base_url():
     url=os.getenv('QA_OLLAMA_URL') or os.getenv('OLLAMA_URL','http://127.0.0.1:11434')
@@ -29,6 +48,11 @@ def require_local_model(client,model,url=None):
         raise ModelUnavailable('Model must expose local model metadata; remote or unknown models are blocked')
 
 def readiness():
+    if provider()=='claude':
+        return _claude_readiness()
+    return _ollama_readiness()
+
+def _ollama_readiness():
     model=model_name()
     if not model:
         return {'configured':False,'ready':False,'model':None,'reason':'Set QA_MODEL to an installed local Ollama model.','provider':'local Ollama'}
@@ -44,6 +68,11 @@ def readiness():
         return {'configured':True,'ready':False,'model':model,'reason':'Local model service is unavailable or misconfigured.','provider':'local Ollama'}
 
 def chat(system,payload,schema):
+    if provider()=='claude':
+        return _claude_chat(system,payload,schema)
+    return _ollama_chat(system,payload,schema)
+
+def _ollama_chat(system,payload,schema):
     model=model_name()
     if not model:
         raise ModelUnavailable('AI is not configured. Set QA_MODEL and run the local Ollama service.')
@@ -66,3 +95,74 @@ def chat(system,payload,schema):
     except (httpx.HTTPError,KeyError,ValueError) as exc:
         # Do not expose/log provider response bodies, prompts or source text.
         raise ModelUnavailable('Local AI request failed. Check the model service and retry.') from None
+
+
+# ---------------------------------------------------------------- Claude (fictional demo only)
+
+def _usage_path():
+    from backend import config
+    return config.DATA/'claude_usage.json'
+
+def _calls_today():
+    from datetime import date
+    try:
+        data=json.loads(_usage_path().read_text())
+    except (OSError,ValueError):
+        return 0
+    return int(data.get(date.today().isoformat(),0))
+
+def _record_call():
+    from datetime import date
+    path=_usage_path(); today=date.today().isoformat()
+    path.write_text(json.dumps({today:_calls_today()+1}))
+
+def daily_limit():
+    try:
+        return max(0,int(os.getenv('QA_DAILY_LIMIT','200')))
+    except ValueError:
+        return 200
+
+def _claude_readiness():
+    base={'configured':True,'provider':'Claude (fictional demo)','model':model_name() or None}
+    if private_local():
+        return {**base,'ready':False,'reason':'Claude answers are disabled in a private local copy; use a local Ollama model for real documents.'}
+    if not os.getenv('ANTHROPIC_API_KEY'):
+        return {**base,'configured':False,'ready':False,'reason':'Set ANTHROPIC_API_KEY to use Claude answers.'}
+    left=daily_limit()-_calls_today()
+    if left<=0:
+        return {**base,'ready':False,'reason':'Daily Claude call limit reached; evidence search still works. It resets tomorrow.'}
+    return {**base,'ready':True,'reason':None,'calls_left_today':left}
+
+def _inline_refs(schema):
+    """Resolve local $ref/$defs so the tool schema is self-contained."""
+    defs=schema.get('$defs',{})
+    def walk(node):
+        if isinstance(node,dict):
+            if '$ref' in node and node['$ref'].startswith('#/$defs/'):
+                return walk(defs[node['$ref'].split('/')[-1]])
+            return {k:walk(v) for k,v in node.items() if k!='$defs'}
+        if isinstance(node,list):
+            return [walk(v) for v in node]
+        return node
+    return walk(schema)
+
+def _claude_chat(system,payload,schema):
+    status=_claude_readiness()
+    if not status['ready']:
+        raise ModelUnavailable(status['reason'])
+    tool={'name':'respond','description':'Return the structured response.','input_schema':_inline_refs(schema)}
+    body={'model':model_name(),'max_tokens':2000,'temperature':0,'system':system,'tools':[tool],
+          'tool_choice':{'type':'tool','name':'respond'},
+          'messages':[{'role':'user','content':json.dumps(payload,ensure_ascii=False)}]}
+    _record_call()
+    try:
+        with httpx.Client(timeout=httpx.Timeout(120,connect=10),trust_env=False,follow_redirects=False) as client:
+            response=client.post(CLAUDE_URL,json=body,headers={'x-api-key':os.environ['ANTHROPIC_API_KEY'],'anthropic-version':'2023-06-01','content-type':'application/json'})
+    except httpx.HTTPError:
+        raise ModelUnavailable('Could not reach Claude. Check the network and retry.') from None
+    if response.status_code!=200:
+        raise ModelUnavailable(f'Claude request failed ({response.status_code}). Check the API key.')  # never log bodies
+    for part in response.json().get('content',[]):
+        if part.get('type')=='tool_use' and isinstance(part.get('input'),dict):
+            return part['input']
+    raise ModelResponseError('Claude returned no structured response')

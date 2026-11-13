@@ -98,7 +98,7 @@ def health(): return {'status':'ok','mode':'fictional-data-demo'}
 @app.get('/api/status')
 def status(request:Request):
     identity=user(request)
-    return {'mode':'private-local-copy' if PRIVATE_LOCAL else 'fictional-data-demo','external_cloud':'disabled','model':model_status(),'scopes':identity['groups'],'sharepoint':'not connected','retention':'Company records retained locally; temporary processing copies cleaned after each job.','production':'blocked pending company acceptance'}
+    return {'mode':'private-local-copy' if PRIVATE_LOCAL else 'fictional-data-demo','external_cloud':'claude answers (fictional demo)' if qa_provider.provider()=='claude' and not PRIVATE_LOCAL else 'disabled','model':model_status(),'scopes':identity['groups'],'sharepoint':'not connected','retention':'Records retained locally; temporary processing copies cleaned after each job.','production':'blocked: demo sign-in only'}
 
 def records_for(db,identity):
     return list(db.scalars(select(Record).where(Record.deleted==False,Record.scope.in_(identity['groups'])).order_by(Record.created.desc())))

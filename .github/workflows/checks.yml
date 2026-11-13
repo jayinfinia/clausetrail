@@ -49,3 +49,5 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci --prefix frontend
       - run: npm run build --prefix frontend
+      - name: Committed interface build is up to date
+        run: git diff --exit-code --stat frontend/dist || (echo "Run npm run build --prefix frontend and commit frontend/dist" && exit 1)

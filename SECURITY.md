@@ -10,7 +10,8 @@ Use fictional files only. The selectable demo identities are role-testing aids, 
 - Office macros rejected for extraction; spreadsheet formulas never evaluated; CSV export formula-leading values escaped.
 - Review required before operational deadlines; revision conflict checks; cross-scope amendment linking rejected.
 - Original demo copies retained for evidence; temporary job copies removed after success/failure and stale copies swept after an hour.
-- Cloud AI disabled. Local model metadata is verified before sending evidence; cloud/remote model aliases are rejected. No proxy or redirect following.
+- Local model metadata is verified before sending evidence; cloud/remote model aliases are rejected. No proxy or redirect following.
+- Claude answers (QA_PROVIDER=claude) are for the fictional demo only: refused in a private local copy, destination fixed to api.anthropic.com, environment proxies ignored, response bodies never logged, and a daily call limit. This path is tested with a mocked API.
 - AI answers require exact quotations and a second support-check prompt; sources and permissions are rechecked after inference and when opening citations. These checks reduce risk but do not guarantee semantic correctness.
 - Deletion blocks active retrieval and removes source/derived content; protected amendment evidence cannot be removed while referenced.
 

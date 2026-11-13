@@ -14,7 +14,7 @@ When an AI system reads contracts for a team, the hard part is not producing an 
 |---|---|
 | **Traceable** | Each claim cites passages; the quote must occur verbatim in the source, numbers in the claim must appear in the cited text, and a separate support-check call must agree. Otherwise the claim is dropped and the answer is marked partial or abstains. |
 | **Auditable** | Nothing extracted becomes a fact until a reviewer approves it with evidence. Imports, reviews, label edits and settings changes are logged with who, when, old and new value. Deadlines and counts come from reviewed facts, not from a model. |
-| **Private** | Sensitive values are redacted locally (rules, OCR and an optional local Llama model) before a document is stored. Question answering only talks to a local model. Optional Claude tagging receives redacted text only, to a destination fixed in code. |
+| **Private** | Sensitive values are redacted locally (rules, OCR and an optional local Llama model) before a document is stored. With real documents, question answering only talks to a local model. Claude can write answers for the fictional demo and tag redacted text, always to a destination fixed in code. |
 
 ## Measured on real contracts
 
@@ -41,19 +41,43 @@ The end-to-end sample is small (95% intervals of roughly ±20 points); the main 
 - **Labeling taxonomy** (relationship types, owners, components, ID prefix) in [`config/taxonomy.json`](config/taxonomy.json), so it can be adapted to any organization. Folder paths such as `Suppliers/<counterparty>/file.pdf` produce suggested labels.
 - **Access scopes** enforced at the API, evidence, search, jobs, download and export boundaries. Demo identities show how access works.
 
-## Run locally
+## Try it
 
-Requires Python 3.12+ and Node 22+. For scanned PDFs install Tesseract and Poppler (`brew install tesseract poppler` on macOS, `apt install tesseract-ocr poppler-utils` on Debian or Ubuntu).
+You need [Python 3.12 or newer](https://www.python.org/downloads/). Nothing else.
+
+1. **Download** this repository (green **Code** button → **Download ZIP**, then unzip) or `git clone` it.
+2. **Double-click** `Clausetrail.command` (macOS) or `Clausetrail.bat` (Windows). The first start takes about a minute to set up; later starts take a few seconds. Your browser opens to Clausetrail.
+3. **Sign in** as Alex Morgan and choose **Add agreements → Load fictional examples**.
+
+Then try:
+
+- **Review queue**: open an agreement, check each proposed value against its highlighted source passage, and approve.
+- **Ask agreements**: "Can the recipient share the Lark materials with another lab?" or "Which CDAs expire in the next 90 days?" Click the C1, C2 buttons to see the exact quoted evidence.
+- **Expiration alerts** and the **Edit log**: every change shows who made it, when, and the old and new value.
+- **Switch identity** (bottom left) to Sam Rivera, a viewer, or Jordan Lee, who only sees the restricted legal collection.
+
+On macOS, if a downloaded ZIP says the file "cannot be opened", right-click `Clausetrail.command` → **Open** once. The demo identities show roles, not real sign-in; the app only listens on this computer.
+
+### Turn on written answers
+
+Without a model, **Ask agreements** shows the matching cited passages. For written, cited answers on the fictional demo, copy `.env.example` to `.env` and set:
+
+```sh
+QA_PROVIDER=claude
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Restart the launcher. Answers are capped at `QA_DAILY_LIMIT` model calls per day (default 200; a question uses about 2 to 4). Claude answers are refused in the private mode for real documents, which uses a local model instead (below).
+
+### From a terminal
 
 ```sh
 python -m venv .venv && source .venv/bin/activate
 pip install -r backend/requirements.txt
-python scripts/start.py
+python scripts/start.py --open
 ```
 
-Open http://localhost:8000, sign in as **Alex Morgan** and choose **Add agreements → Load fictional examples**. Open the **Review queue**, inspect the evidence and approve. Switch to **Sam Rivera** (viewer) or **Jordan Lee** (restricted legal collection) to see access scoping.
-
-The demo identities are for showing roles, not real authentication. Keep the app on localhost.
+For scanned PDFs install Tesseract and Poppler (`brew install tesseract poppler`, or `apt install tesseract-ocr poppler-utils`). Node 22+ is only needed to change the interface; a built copy is committed.
 
 ### Docker and PostgreSQL
 
@@ -62,11 +86,11 @@ cp .env.example .env       # set POSTGRES_PASSWORD to a random value
 docker compose up --build
 ```
 
-### Local AI answers
+### Local AI answers (private, works with real documents)
 
 ```sh
 ollama pull qwen2.5:7b
-QA_MODEL=qwen2.5:7b python scripts/start.py
+QA_MODEL=qwen2.5:7b python scripts/start.py --open
 ```
 
 See [docs/AI_QA.md](docs/AI_QA.md) for how answers are checked and what the screen shows.
@@ -99,7 +123,7 @@ python scripts/start.py
 
 ```sh
 pip install -r requirements-dev.txt
-python -m unittest discover -s tests -v       # 150 tests
+python -m unittest discover -s tests -v       # 155 tests
 npm ci --prefix frontend && npm run build --prefix frontend
 python -m scripts.smoke http://localhost:8000  # live HTTP flow against a running demo
 ```

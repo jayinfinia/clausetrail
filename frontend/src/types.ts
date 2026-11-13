@@ -14,7 +14,7 @@ export type Job={id:string;agreement_id:string;filename:string;status:string;err
 export type Vocab={organization:string;alert_roles:string[];relationship_types:string[];components:string[];directions:string[];statuses:string[];owners:string[];kinds:Record<string,{code:string;primary:string}>;private_local:boolean};
 export type Citation={id?:string;kind?:string;agreement_id:string;filename:string;block_id:string;locator:string;text:string;version:string;digest?:string;revision?:number;reviewed?:boolean;start?:number;end?:number};
 export type Answer={answer:string;mode:string;status?:string;model?:string;warnings?:string[];claims?:{text:string;citations:string[];documents?:string[]}[];retrieval?:{passages_total:number;passages_sent:number;truncated:boolean;documents_sent?:number};citations:Citation[];rows:Record<string,unknown>[];coverage:{accessible_documents:number;selected_documents?:number;pending_or_failed:number;unreviewed:number}};
-export type AIStatus={configured:boolean;ready:boolean;model:string|null;reason:string|null};
+export type AIStatus={configured:boolean;ready:boolean;model:string|null;reason:string|null;provider?:string;calls_left_today?:number};
 
 export const FIELDS=['agreement_type','counterparty','owner','effective_date','expiration_date','notice_days','confidentiality_end','return_date','permitted_use','renewal','parent_reference'];
 export const IN_PROGRESS=['Requested','Drafting','In review','Out for signature'];

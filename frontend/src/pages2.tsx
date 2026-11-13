@@ -126,7 +126,7 @@ export function Ask({c}:{c:Ctx}){
  return <>
   <div className="head"><div><h1>Ask agreements</h1><p className="sub">Answers quote the agreements they come from. If the documents don't support an answer, it says so instead of guessing.</p></div></div>
   <section className="panel ask">
-   <div className="row"><Pill k={st?.ready?'good':st?.configured?'bad':'info'}>{st?.ready?'Local AI ready':st?.configured?'AI unavailable':'Evidence search'}</Pill><span className="small muted">{st?.ready?st.model:st?.reason||'Checking…'}</span></div>
+   <div className="row"><Pill k={st?.ready?'good':st?.configured?'bad':'info'}>{st?.ready?(st.provider?.startsWith('Claude')?'Claude answers ready':'Local AI ready'):st?.configured?'AI unavailable':'Evidence search'}</Pill><span className="small muted">{st?.ready?st.model+(st.calls_left_today!=null?` · ${st.calls_left_today} model calls left today`:''):st?.reason||'Checking…'}</span></div>
    <div className="grid2"><label>Answer with<select value={mode} onChange={e=>setMode(e.target.value)}><option value="auto">Best available (AI when set up)</option><option value="ai">AI answer (needs a local model)</option><option value="evidence">Evidence only, no AI</option></select></label>
     <label>Search in<select value={scope} onChange={e=>setScope(e.target.value)}><option value="">All agreements you can see</option>{c.records.map(r=><option key={r.id} value={r.id}>{party(r)} · {kindOf(r)}</option>)}</select></label></div>
    <textarea aria-label="Question" value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)&&q.length>1)ask()}}/>

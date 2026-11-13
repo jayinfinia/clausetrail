@@ -51,7 +51,7 @@
 - **Nothing automatic is a fact.** Extraction, tagging and folder hints produce proposals. Facts become approved only when a reviewer accepts them with a supporting passage, and deadlines count only reviewer-confirmed executed agreements.
 - **Every claim is quoted.** A model claim survives only if each quote occurs verbatim (whitespace aside) in the cited passage, every number or date in the claim appears in the cited text, and a separate support-check call agrees the evidence supports the claim and answers the question. Status (answered, partial, conflicting, insufficient evidence) is computed by the server, never taken from the model.
 - **Access is checked before retrieval and again after inference.** Sources deleted, revised or made inaccessible during inference are dropped, and citation inspection revalidates them again.
-- **No data egress by default.** Question answering only talks to a local Ollama host, rejects cloud model names and ignores proxy settings. Claude tagging is opt-in, receives only locally redacted text, and its destination is fixed in code.
+- **No data egress by default.** Question answering talks to a local Ollama host, rejects cloud model names and ignores proxy settings. Two opt-in exceptions, both with destinations fixed in code: Claude can write answers in the fictional demo (refused in private mode, daily call cap), and Claude tagging receives only locally redacted text.
 - **Counts and dates are not left to the model.** Questions such as "what expires next quarter" are answered from the reviewed register.
 
 ## Storage

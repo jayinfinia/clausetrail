@@ -1,0 +1,51 @@
+name: Application checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        database: [sqlite, postgres]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: clausetrail
+          POSTGRES_PASSWORD: ci-disposable-only
+          POSTGRES_DB: clausetrail_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U clausetrail -d clausetrail_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: SQLite acceptance
+        if: matrix.database == 'sqlite'
+        run: python -m unittest discover -s tests -v
+      - name: PostgreSQL acceptance
+        if: matrix.database == 'postgres'
+        env:
+          DATABASE_URL: postgresql+psycopg://clausetrail:ci-disposable-only@localhost:5432/clausetrail_test
+        run: python -m unittest discover -s tests -v
+      - run: python -m compileall -q backend scripts
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --prefix frontend
+      - run: npm run build --prefix frontend

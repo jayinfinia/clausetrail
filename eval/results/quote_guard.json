@@ -1,0 +1,53 @@
+{
+  "stage": "quote_guard",
+  "dataset": "CUAD v1 test split",
+  "contracts": 102,
+  "definition": "Each lawyer-annotated answer span (12+ characters) is offered to the exact-quote check as if a model had cited it, then altered in ways a model might hallucinate. Verbatim and re-wrapped quotes should pass; altered or borrowed quotes should be rejected.",
+  "variants": {
+    "verbatim": {
+      "should_accept": true,
+      "cases": 2432,
+      "accepted": 2432,
+      "accept_rate": 100.0,
+      "correct_rate": 100.0
+    },
+    "whitespace_reflowed": {
+      "should_accept": true,
+      "cases": 2430,
+      "accepted": 2430,
+      "accept_rate": 100.0,
+      "correct_rate": 100.0
+    },
+    "number_changed": {
+      "should_accept": false,
+      "cases": 967,
+      "accepted": 0,
+      "accept_rate": 0.0,
+      "correct_rate": 100.0
+    },
+    "negation_inserted": {
+      "should_accept": false,
+      "cases": 1236,
+      "accepted": 0,
+      "accept_rate": 0.0,
+      "correct_rate": 100.0
+    },
+    "word_dropped": {
+      "should_accept": false,
+      "cases": 1833,
+      "accepted": 0,
+      "accept_rate": 0.0,
+      "correct_rate": 100.0
+    },
+    "from_other_contract": {
+      "should_accept": false,
+      "cases": 2425,
+      "accepted": 0,
+      "accept_rate": 0.0,
+      "correct_rate": 100.0
+    }
+  },
+  "skipped_true_boilerplate_matches": 2,
+  "limit": "This checks that a quote exists in the source. It cannot tell whether a claim interprets a real quote correctly; that is the job of the separate support-check model call, measured by the live stage.",
+  "seconds": 17.4
+}

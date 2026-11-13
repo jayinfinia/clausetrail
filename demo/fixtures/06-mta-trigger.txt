@@ -1,0 +1,14 @@
+FICTIONAL DEMO DOCUMENT — NOT A LEGAL AGREEMENT
+Agreement type: MTA
+Counterparty: Fern Example Materials
+Internal owner: Alex Morgan
+Effective date: 2026-01-01
+Expiration date: 2027-04-01
+Notice days: 30
+Confidentiality end: unknown
+Permitted use: Evaluation of fictional research materials only.
+Renewal: Written agreement required; no automatic renewal.
+The recipient must not redistribute materials to third parties.
+Confidentiality obligations survive expiration as separately stated above.
+Return date: 30 days after project completion
+Signatures: Fictional signatures for demonstration only. Reviewer must verify execution.

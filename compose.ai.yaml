@@ -1,0 +1,19 @@
+# Opt-in local model service. No model downloads occur during application startup.
+services:
+  app:
+    environment:
+      QA_MODEL: ${QA_MODEL:?Set QA_MODEL to the local model you will install}
+      QA_OLLAMA_URL: http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_started
+  ollama:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+    volumes:
+      - ollama_models:/root/.ollama
+    # Deliberately no published port; only the app's local Docker network uses it.
+    restart: unless-stopped
+volumes:
+  ollama_models:

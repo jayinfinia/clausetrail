@@ -1,0 +1,152 @@
+{
+  "stage": "redaction",
+  "dataset": "CUAD v1 test split",
+  "contracts": 102,
+  "policy": "standard",
+  "detector": "rules only (no local model)",
+  "injected": {
+    "definition": "Fictional SSNs, tax IDs, card and account numbers and dates of birth are inserted into each real contract at a random sentence boundary in 13 layouts. Detected means one redaction span covers the whole value.",
+    "overall_recall": 100.0,
+    "cases": 1326,
+    "by_layout": [
+      {
+        "category": "DOB",
+        "layout": "labeled",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      },
+      {
+        "category": "DOB",
+        "layout": "labeled, long form",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      },
+      {
+        "category": "DOB",
+        "layout": "phrase",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      },
+      {
+        "category": "FIN_ACCOUNT",
+        "layout": "labeled",
+        "cases": 204,
+        "detected": 204,
+        "recall": 100.0
+      },
+      {
+        "category": "FIN_ACCOUNT",
+        "layout": "labeled, spaced",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      },
+      {
+        "category": "FIN_ACCOUNT",
+        "layout": "unlabeled card (Luhn-valid)",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      },
+      {
+        "category": "GOV_ID",
+        "layout": "label on previous line",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      },
+      {
+        "category": "GOV_ID",
+        "layout": "labeled",
+        "cases": 306,
+        "detected": 306,
+        "recall": 100.0
+      },
+      {
+        "category": "GOV_ID",
+        "layout": "labeled, no dashes",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      },
+      {
+        "category": "GOV_ID",
+        "layout": "unlabeled SSN shape",
+        "cases": 102,
+        "detected": 102,
+        "recall": 100.0
+      }
+    ],
+    "oversized_spans": 0
+  },
+  "clean_contracts": {
+    "definition": "Flags raised on the unmodified contracts. These are public filings, so a flag is not necessarily wrong: company tax IDs and payment account numbers are in scope for the policy. A random sample is listed for manual review.",
+    "characters": 4778515,
+    "flags": 9,
+    "flags_per_100k_chars": 0.19,
+    "by_category": {
+      "FIN_ACCOUNT": 7,
+      "GOV_ID": 2
+    },
+    "review_sample": [
+      {
+        "contract": "USASYNTHETICFUELCORP_10_21_2010-EX-10.10-STRATEGIC ALLIANCE ",
+        "category": "FIN_ACCOUNT",
+        "value_chars": 9,
+        "context": " Cincinnati, OH ABA No.: [[#########]] Acco"
+      },
+      {
+        "contract": "AIRSPANNETWORKSINC_04_11_2000-EX-10.5-Distributor Agreement",
+        "category": "FIN_ACCOUNT",
+        "value_chars": 8,
+        "context": "SA. Account name: Airspan Networks Inc. Account number: [[########]] Routing Number: ### - #"
+      },
+      {
+        "contract": "TRICITYBANKSHARESCORP_05_15_1998-EX-10-OUTSOURCING AGREEMENT",
+        "category": "FIN_ACCOUNT",
+        "value_chars": 12,
+        "context": "ement\") with Data Securities International, Inc. (\"DSI\"), Account no. [[#######-####]], pursuant to which M&I has de"
+      },
+      {
+        "contract": "AIRSPANNETWORKSINC_04_11_2000-EX-10.5-Distributor Agreement",
+        "category": "FIN_ACCOUNT",
+        "value_chars": 15,
+        "context": "an Networks Inc. Account number: ######## Routing Number: [[### - #### - ##]] Further instructions: \"R"
+      },
+      {
+        "contract": "TEARDROPGOLFCO_10_23_1996-EX-10.12-ENDORSEMENT AGREEMENT",
+        "category": "FIN_ACCOUNT",
+        "value_chars": 9,
+        "context": "ational Escrow Fund Account #: ########-## ABA #: [[#########]] Bank Name: Franklin N"
+      },
+      {
+        "contract": "TEARDROPGOLFCO_10_23_1996-EX-10.12-ENDORSEMENT AGREEMENT",
+        "category": "FIN_ACCOUNT",
+        "value_chars": 11,
+        "context": "Account Name: Advantage International Escrow Fund Account #: [[########-##]] ABA #: ######### "
+      },
+      {
+        "contract": "DRIVENDELIVERIES,INC_05_22_2020-EX-10.4-CONSULTING AGREEMENT",
+        "category": "GOV_ID",
+        "value_chars": 10,
+        "context": "t\" TruckThat LLC By: /s/ Christian L. Schenk CHRISTIAN L. SCHENK EIN: [[##-#######]] TruckThat LLC Consulting Agre"
+      },
+      {
+        "contract": "USASYNTHETICFUELCORP_10_21_2010-EX-10.10-STRATEGIC ALLIANCE ",
+        "category": "FIN_ACCOUNT",
+        "value_chars": 12,
+        "context": " ABA No.: ######### Account No.: [[##-####-####]] Acco"
+      },
+      {
+        "contract": "IntegrityMediaInc_20010329_10-K405_EX-10.17_2373875_EX-10.17",
+        "category": "GOV_ID",
+        "value_chars": 10,
+        "context": ". INTEGRITY INCORPORATED TIME LIFE, INC. Tax ID#[[##-#######]] Tax"
+      }
+    ]
+  },
+  "seconds": 15.1
+}

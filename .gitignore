@@ -1,0 +1,22 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
+dist/
+coverage/
+.local/
+uploads/
+*.log
+.DS_Store
+
+# Real agreements must never be committed. Fictional fixtures are .txt and generated formats live in .local/.
+*.pdf
+*.docx
+*.doc
+*.xlsx
+*.xls
+.local-private/

@@ -1,0 +1,13 @@
+FICTIONAL DEMO DOCUMENT — NOT A LEGAL AGREEMENT
+Agreement type: SERVICES
+Counterparty: Quarry Fictional Labs
+Internal owner: Alex Morgan
+Effective date: 2026-06-01
+Expiration date: 2027-05-31
+Notice days: 30
+1. Services. Quarry Fictional Labs will perform fictional assay-validation services described in Schedule 1.
+2. Fees. Northwind Labs will pay a fixed fee of USD 12,500 for each completed milestone, up to three milestones.
+3. Invoicing. Quarry Fictional Labs will invoice after each milestone, and payment is due within 45 days of a correct invoice.
+4. Materials. Quarry Fictional Labs must return all Northwind Labs samples within 15 days after the services are complete.
+5. Confidentiality. Quarry Fictional Labs must keep Northwind Labs information confidential during the term and for four years afterwards.
+Signatures: Fictional signatures for demonstration only. Reviewer must verify execution.

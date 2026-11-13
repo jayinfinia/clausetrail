@@ -1,0 +1,13 @@
+FICTIONAL DEMO DOCUMENT — NOT A LEGAL AGREEMENT
+Agreement type: AMENDMENT
+Counterparty: Lark Fictional Biosciences
+Internal owner: Priya Shah
+Effective date: 2027-01-15
+Parent reference: 13-mta-consent.txt
+Expiration date: 2028-02-29
+Notice days: 45
+1. Term. The expiration date of the Material Transfer Agreement is extended from 2027-02-28 to 2028-02-29.
+2. Notice. The notice period is changed from 30 days to 45 days.
+3. Additional site. Recipient may also use the Materials at Orchid Demo Institute, provided Orchid Demo Institute agrees in writing to the use restrictions of the original Agreement.
+4. All other terms of the original Agreement remain unchanged.
+Signatures: Fictional signatures for demonstration only. Reviewer must verify execution.

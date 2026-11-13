@@ -1,0 +1,12 @@
+FICTIONAL DEMO DOCUMENT — NOT A LEGAL AGREEMENT
+Agreement type: MTA
+Counterparty: Nimbus Imaginary Therapeutics
+Internal owner: Alex Morgan
+Effective date: 2026-04-15
+Expiration date: 2026-12-31
+1. Use. Recipient may use the fictional compound NIT-22 only to run the screening study described in Attachment A.
+2. Modifications. Recipient may create derivatives for the study but must not use the compound or any derivative for commercial purposes.
+3. Third parties. Recipient must not transfer the compound or any derivative to any third party.
+4. Disposal. Upon completion of the study, Recipient must destroy all remaining compound and derivatives. Return to Provider is not required.
+5. Confidentiality. Study results are confidential until Provider approves their release in writing.
+Signatures: Fictional signatures for demonstration only. Reviewer must verify execution.

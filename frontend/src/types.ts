@@ -1,0 +1,20 @@
+export type User={id:string;name:string;role:string;groups:string[]};
+export type Fact={value:string|number|null;evidence?:string|null;note?:string;source_agreement_id?:string|null;reviewer?:string};
+export type Proposal=Fact & {state:string;method:string;raw?:string;source?:{filename:string;sheet:string;row:number}};
+export type Labels={rel?:string;owner?:string;kind?:string;primaryType?:string;dir?:string;status?:string|null;components?:string[];party?:string|null;eff?:string|null;endRule?:string;floor?:string|null;relEnd?:string|null;waiting?:string|null;ref_id?:string;confirmed?:boolean;suggestedFrom?:string[];sourceFolder?:string|null;redaction?:Redaction;tagging?:{status:string;model?:string;fields?:number;reason?:string}};
+export type Redaction={engine:string;policy:string;model:string|null;redactions:number;by_category:Record<string,number>;warnings:string[];pages?:number;scanned_pages?:number};
+export type RedactionStatus={policies:Record<string,string[]>;llm:{ready:boolean;model:string|null;reason:string|null};ocr:boolean;default:string;tagging:{ready:boolean;model:string|null;reason:string|null}};
+export type Framework={ref_id?:string|null;relationship:string;owner:string;kind:string;counterparty:string;standard_name:string;standard_folder:string;name_warnings:string[];end_rule:string;end_date:string|null;floor:string|null;open_ended:boolean};
+export type Block={id:string;locator:string;text:string};
+export type History={actor:string;action:string;detail:unknown;created:string};
+export type RecordItem={id:string;filename:string;scope:string;status:string;revision:number;executed:boolean;approved:Record<string,Fact>;proposals?:Record<string,Proposal>;blocks?:Block[];history?:History[];labels:Labels;rel_path:string;framework:Framework;parent_id?:string|null;created:string};
+export type Deadline={id:string;agreement_id:string;filename:string;counterparty:string;kind:string;date:string;days:number;status:string;ref_id?:string|null;owner?:string;relationship?:string;label_status?:string|null};
+export type Dash={total:number;review:number;executed:number;unknown_expiration:number;overdue:number;upcoming:number;failed:number;deadlines:Deadline[];by_relationship:Record<string,number>;by_owner:Record<string,number>;open_ended:number;unconfirmed_labels:number};
+export type Job={id:string;agreement_id:string;filename:string;status:string;error:string;attempts:number};
+export type Vocab={organization:string;alert_roles:string[];relationship_types:string[];components:string[];directions:string[];statuses:string[];owners:string[];kinds:Record<string,{code:string;primary:string}>;private_local:boolean};
+export type Citation={id?:string;kind?:string;agreement_id:string;filename:string;block_id:string;locator:string;text:string;version:string;digest?:string;revision?:number;reviewed?:boolean;start?:number;end?:number};
+export type Answer={answer:string;mode:string;status?:string;model?:string;warnings?:string[];claims?:{text:string;citations:string[];documents?:string[]}[];retrieval?:{passages_total:number;passages_sent:number;truncated:boolean;documents_sent?:number};citations:Citation[];rows:Record<string,unknown>[];coverage:{accessible_documents:number;selected_documents?:number;pending_or_failed:number;unreviewed:number}};
+export type AIStatus={configured:boolean;ready:boolean;model:string|null;reason:string|null};
+
+export const FIELDS=['agreement_type','counterparty','owner','effective_date','expiration_date','notice_days','confidentiality_end','return_date','permitted_use','renewal','parent_reference'];
+export const IN_PROGRESS=['Requested','Drafting','In review','Out for signature'];

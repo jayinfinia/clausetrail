@@ -1,0 +1,15 @@
+FICTIONAL DEMO DOCUMENT — NOT A LEGAL AGREEMENT
+Agreement type: MTA
+Counterparty: Lark Fictional Biosciences
+Internal owner: Priya Shah
+Effective date: 2026-03-01
+Expiration date: 2027-02-28
+Notice days: 30
+1. Materials. Provider will supply the fictional cell line LFB-7 and related data (the "Materials").
+2. Use. Recipient may use the Materials solely for in vitro research in Recipient's own laboratory. The Materials must not be used in humans or for any commercial purpose.
+3. Transfer. Recipient may transfer the Materials to a third party only with Provider's prior written consent, and any permitted recipient must accept terms at least as protective as this Agreement.
+4. Publication. Recipient may publish results after giving Provider 30 days to review the manuscript for Provider confidential information.
+5. End of use. Within 60 days after this Agreement ends, Recipient must, at Provider's election, either return all unused Materials or destroy them and certify the destruction in writing.
+6. Confidentiality. Recipient's confidentiality obligations continue for three years after this Agreement ends.
+7. Renewal. This Agreement may be extended only by a written amendment signed by both parties.
+Signatures: Fictional signatures for demonstration only. Reviewer must verify execution.

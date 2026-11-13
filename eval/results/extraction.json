@@ -1,0 +1,38 @@
+{
+  "stage": "extraction",
+  "dataset": "CUAD v1 test split",
+  "contracts": 102,
+  "definition": "The default extractor only reads explicit \"Label: value\" lines and abstains otherwise. This counts how often it proposes anything on real contracts and whether its evidence line overlaps the matching CUAD annotation.",
+  "field_slots": 1122,
+  "proposals": 3,
+  "abstention_rate": 99.7,
+  "proposals_by_field": {
+    "effective_date": 3
+  },
+  "evidence_overlaps_gold": 2,
+  "examples": [
+    {
+      "contract": "ThriventVariableInsuranceAccountB_20190701_N-6_EX-99.D(IV)_1",
+      "field": "effective_date",
+      "raw": "July 1, 2019",
+      "state": "ambiguous",
+      "evidence_matches_gold": true
+    },
+    {
+      "contract": "BIOPURECORP_06_30_1999-EX-10.13-AGENCY AGREEMENT",
+      "field": "effective_date",
+      "raw": "January 5, 1999    17",
+      "state": "ambiguous",
+      "evidence_matches_gold": false
+    },
+    {
+      "contract": "WestPharmaceuticalServicesInc_20200116_8-K_EX-10.1_11947529_",
+      "field": "effective_date",
+      "raw": "January 1, 2019",
+      "state": "ambiguous",
+      "evidence_matches_gold": true
+    }
+  ],
+  "takeaway": "On real contracts the deterministic extractor almost always abstains. That is the intended failure mode (no invented values), and it is why model-assisted tagging with quote grounding exists.",
+  "seconds": 0.8
+}

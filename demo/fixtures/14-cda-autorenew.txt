@@ -1,0 +1,12 @@
+FICTIONAL DEMO DOCUMENT — NOT A LEGAL AGREEMENT
+Agreement type: CDA
+Counterparty: Maple Example Analytics
+Internal owner: Jordan Lee
+Effective date: 2026-02-01
+Expiration date: 2027-01-31
+1. Purpose. The parties will exchange confidential information solely to evaluate a possible fictional data-analysis collaboration.
+2. Term and renewal. This Agreement has an initial term of one year and renews automatically for successive one-year periods unless either party gives written notice of non-renewal at least 60 days before the end of the then-current term.
+3. Obligations. The receiving party must protect confidential information with at least reasonable care and may disclose it only to employees who need to know it for the purpose.
+4. Survival. Confidentiality obligations continue for five years after the date of each disclosure, except that trade secrets remain protected for as long as they remain trade secrets.
+5. Return. On request, the receiving party must promptly return or destroy confidential information, except one archival copy kept by legal counsel.
+Signatures: Fictional signatures for demonstration only. Reviewer must verify execution.

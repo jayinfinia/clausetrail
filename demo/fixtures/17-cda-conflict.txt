@@ -1,0 +1,10 @@
+FICTIONAL DEMO DOCUMENT — NOT A LEGAL AGREEMENT
+Agreement type: CDA
+Counterparty: Pine Sample Partners
+Internal owner: Sam Rivera
+Effective date: 2026-05-01
+Expiration date: 2027-09-30
+1. Purpose. Information is disclosed only to discuss a fictional equipment-sharing arrangement.
+2. Term. This Agreement terminates on 2027-10-31 unless terminated earlier by either party on 30 days' written notice.
+3. Survival. Confidentiality obligations survive termination for two years.
+Signatures: Fictional signatures for demonstration only. Reviewer must verify execution.

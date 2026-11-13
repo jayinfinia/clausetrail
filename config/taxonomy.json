@@ -1,0 +1,35 @@
+{
+  "_comment": "Labeling taxonomy for Clausetrail. Edit this file (or point TAXONOMY_FILE at your own copy) to match your organization. The demo organization and every name below are fictional.",
+  "organization": "Northwind Labs",
+  "id_prefix": "AGR",
+  "relationship_types": [
+    "Research partner",
+    "Supplier",
+    "Service provider",
+    "Consultant / advisor",
+    "Customer",
+    "Investor",
+    "Funder",
+    "Unclassified"
+  ],
+  "folder_aliases": {
+    "research partners": "Research partner",
+    "universities": "Research partner",
+    "suppliers": "Supplier",
+    "vendors": "Supplier",
+    "service providers": "Service provider",
+    "contractors": "Service provider",
+    "consultants": "Consultant / advisor",
+    "advisors": "Consultant / advisor",
+    "customers": "Customer",
+    "clients": "Customer",
+    "investors": "Investor",
+    "funders": "Funder",
+    "grants": "Funder",
+    "not sure": "Unclassified"
+  },
+  "owners": ["Legal", "Operations", "Research", "Finance"],
+  "components": ["Confidentiality", "Material transfer", "Data use", "Research", "Services",
+                 "Consulting", "Advisory", "Grant", "Investment", "Payment"],
+  "alert_roles": ["Leadership", "Finance"]
+}

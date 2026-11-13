@@ -1,0 +1,128 @@
+[
+  {
+    "filename": "01-cda-aster.txt",
+    "type": "CDA",
+    "counterparty": "Aster Fictional Labs",
+    "expiration_raw": "2026-11-30",
+    "review_execution": true
+  },
+  {
+    "filename": "02-cda-perpetual.txt",
+    "type": "CDA",
+    "counterparty": "Bluebird Example Research",
+    "expiration_raw": "perpetual",
+    "review_execution": true
+  },
+  {
+    "filename": "03-cda-mutual.txt",
+    "type": "CDA",
+    "counterparty": "Cedar Demo Sciences",
+    "expiration_raw": "2027-02-15",
+    "review_execution": true
+  },
+  {
+    "filename": "04-cda-ambiguous.txt",
+    "type": "CDA",
+    "counterparty": "Delta Imaginary Institute",
+    "expiration_raw": "03/04/27",
+    "review_execution": true
+  },
+  {
+    "filename": "05-mta-return.txt",
+    "type": "MTA",
+    "counterparty": "Elm Fictional University",
+    "expiration_raw": "2027-03-01",
+    "review_execution": true
+  },
+  {
+    "filename": "06-mta-trigger.txt",
+    "type": "MTA",
+    "counterparty": "Fern Example Materials",
+    "expiration_raw": "2027-04-01",
+    "review_execution": true
+  },
+  {
+    "filename": "07-mta-restricted.txt",
+    "type": "MTA",
+    "counterparty": "Grove Private Demo Lab",
+    "expiration_raw": "2027-05-01",
+    "review_execution": true
+  },
+  {
+    "filename": "08-services.txt",
+    "type": "SERVICES",
+    "counterparty": "Harbor Sample Services",
+    "expiration_raw": "2026-12-15",
+    "review_execution": true
+  },
+  {
+    "filename": "09-collaboration.txt",
+    "type": "COLLABORATION",
+    "counterparty": "Iris Fictional Group",
+    "expiration_raw": "2027-06-30",
+    "review_execution": true
+  },
+  {
+    "filename": "10-amendment.txt",
+    "type": "AMENDMENT",
+    "counterparty": "Aster Fictional Labs",
+    "expiration_raw": "2027-11-30",
+    "review_execution": true
+  },
+  {
+    "filename": "11-scan-source.txt",
+    "type": "CDA",
+    "counterparty": "Juniper Scan Example",
+    "expiration_raw": "2027-01-31",
+    "review_execution": true
+  },
+  {
+    "filename": "12-unsigned.txt",
+    "type": "CDA",
+    "counterparty": "Kite Unsigned Example",
+    "expiration_raw": "2027-07-01",
+    "review_execution": false
+  },
+  {
+    "filename": "13-mta-consent.txt",
+    "type": "MTA",
+    "counterparty": "Lark Fictional Biosciences",
+    "expiration_raw": "2027-02-28",
+    "review_execution": true
+  },
+  {
+    "filename": "14-cda-autorenew.txt",
+    "type": "CDA",
+    "counterparty": "Maple Example Analytics",
+    "expiration_raw": "2027-01-31",
+    "review_execution": true
+  },
+  {
+    "filename": "15-mta-destroy.txt",
+    "type": "MTA",
+    "counterparty": "Nimbus Imaginary Therapeutics",
+    "expiration_raw": "2026-12-31",
+    "review_execution": true
+  },
+  {
+    "filename": "16-amendment-lark.txt",
+    "type": "AMENDMENT",
+    "counterparty": "Lark Fictional Biosciences",
+    "expiration_raw": "2028-02-29",
+    "review_execution": true
+  },
+  {
+    "filename": "17-cda-conflict.txt",
+    "type": "CDA",
+    "counterparty": "Pine Sample Partners",
+    "expiration_raw": "2027-09-30",
+    "review_execution": true
+  },
+  {
+    "filename": "18-services-payment.txt",
+    "type": "SERVICES",
+    "counterparty": "Quarry Fictional Labs",
+    "expiration_raw": "2027-05-31",
+    "review_execution": true
+  }
+]

@@ -1,0 +1,4 @@
+-r backend/requirements.txt
+pytest==9.1.1
+reportlab==5.1.0
+pillow==13.0.0

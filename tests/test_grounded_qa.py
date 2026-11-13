@@ -54,6 +54,12 @@ class GroundingTests(unittest.TestCase):
         with self.assertRaises(qa_provider.ModelResponseError):self.run_ai({'answer':'Trust me'})
     def test_string_boolean_is_not_accepted(self):
         with self.assertRaises(qa_provider.ModelResponseError):self.run_ai(draft(),{'verdicts':[{'claim_index':0,'check':'fixture','supported':'true','answers_question':True}]})
+    def test_claude_shaped_reply_is_normalized_not_trusted(self):
+        response=draft();response.pop('not_stated');response['conflicting']='false';response['note']='extra key'
+        response['claims']=response['claims']*10  # more claims than the limit
+        with patch.dict(os.environ,{'QA_MODEL':'test-model'}),patch('backend.services.qa_provider.chat',side_effect=[response]+[supported()]*8):
+            result=ask('Can materials be transferred to a third party?',[record()],mode='ai')
+        self.assertEqual(result['status'],'partial');self.assertTrue(any('more than 8 claims' in w for w in result['warnings']))
     def test_partial_answer_marks_removed_claim(self):
         response=draft();response['claims'].append({'text':'Unfounded fact','evidence':[{'source_id':'fake','quote':'unsupported'}]})
         result,_=self.run_ai(response,supported());self.assertEqual(result['status'],'partial')

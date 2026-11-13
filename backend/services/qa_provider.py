@@ -9,8 +9,20 @@ documents), and a daily call limit (QA_DAILY_LIMIT, default 200 model calls) cap
 """
 import json
 import os
+import re
 from urllib.parse import urlparse
 import httpx
+
+def api_error_reason(response):
+    """Anthropic's own short error message (e.g. low credit balance, invalid model), never the request or document.
+    Error messages describe the problem, not the prompt; they are still capped and stripped of anything quoted."""
+    try:
+        err = response.json().get('error') or {}
+        message = str(err.get('message') or '') if isinstance(err, dict) else ''
+    except Exception:
+        return ''
+    message = re.sub(r'\s+', ' ', message).strip()[:160]
+    return f': {message}' if message else ''
 
 class ModelUnavailable(Exception):
     pass
@@ -161,7 +173,7 @@ def _claude_chat(system,payload,schema):
     except httpx.HTTPError:
         raise ModelUnavailable('Could not reach Claude. Check the network and retry.') from None
     if response.status_code!=200:
-        raise ModelUnavailable(f'Claude request failed ({response.status_code}). Check the API key.')  # never log bodies
+        raise ModelUnavailable(f'Claude request failed ({response.status_code}){api_error_reason(response)}')  # never log request bodies
     for part in response.json().get('content',[]):
         if part.get('type')=='tool_use' and isinstance(part.get('input'),dict):
             return part['input']

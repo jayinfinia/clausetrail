@@ -54,12 +54,17 @@ class ClaudeProviderTests(unittest.TestCase):
                 qa_provider.chat('system', {}, schema)
             self.assertEqual(post.call_count, 3)
 
-    def test_http_error_hides_body(self):
-        bad = MagicMock(); bad.status_code = 401; bad.json.return_value = {'error': 'secret detail'}
+    def test_http_error_shows_only_anthropic_reason(self):
+        bad = MagicMock(); bad.status_code = 400
+        bad.json.return_value = {'type': 'error', 'error': {'type': 'invalid_request_error',
+                                 'message': 'Your credit balance is too low to access the Anthropic API.'}}
         with patch.dict(os.environ, ENV), patch('httpx.Client.post', return_value=bad):
             with self.assertRaises(qa_provider.ModelUnavailable) as ctx:
-                qa_provider.chat('s', {}, {'type': 'object'})
-            self.assertNotIn('secret', str(ctx.exception))
+                qa_provider.chat('s', {'question': 'secret document text'}, {'type': 'object'})
+        self.assertIn('credit balance is too low', str(ctx.exception))
+        self.assertNotIn('secret document text', str(ctx.exception))
+        odd = MagicMock(); odd.status_code = 500; odd.json.side_effect = ValueError
+        self.assertEqual(qa_provider.api_error_reason(odd), '')
 
 
 if __name__ == '__main__':

@@ -19,6 +19,7 @@ import httpx
 
 from backend.config import FIELDS
 from backend.domain import framework as fw
+from backend.services.qa_provider import api_error_reason
 
 API_URL = 'https://api.anthropic.com/v1/messages'
 MAX_CHARS = 60_000
@@ -120,7 +121,7 @@ def call_claude(text):
     except httpx.HTTPError:
         raise TaggingUnavailable('Could not reach Claude')
     if r.status_code != 200:
-        raise TaggingUnavailable(f'Claude request failed ({r.status_code})')  # never log bodies
+        raise TaggingUnavailable(f'Claude request failed ({r.status_code}){api_error_reason(r)}')  # never log request bodies
     for part in r.json().get('content', []):
         if part.get('type') == 'tool_use':
             return part.get('input') or {}

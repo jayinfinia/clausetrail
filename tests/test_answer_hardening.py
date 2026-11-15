@@ -163,9 +163,18 @@ class SupportProtocolTests(unittest.TestCase):
         two['claims'].append({'text': 'The agreement lasts two (2) years.', 'evidence': [{'source_id': 'S1', 'quote': 'terminates two (2) years'}]})
         result, mocked = run([two, verdict(), verdict()], [record(text=text)])
         payload = mocked.call_args_list[1].args[1]
-        self.assertEqual(payload['documents'][0]['defined_parties'], {'Recipient': 'Northwind Labs, LLC', 'Provider': 'Elm Fictional University'})
-        self.assertEqual(payload['documents'][0]['our_organization'], 'Northwind Labs')
+        self.assertEqual(payload['cited_documents'][0]['defined_parties'], {'Recipient': 'Northwind Labs, LLC', 'Provider': 'Elm Fictional University'})
+        self.assertEqual(payload['cited_documents'][0]['our_organization'], 'Northwind Labs')
         self.assertEqual(payload['other_claims_in_this_answer'], ['The agreement lasts two (2) years.'])
+        # Regression (live test): the Claude transport must send the claim and its evidence, not reformat this
+        # payload as drafting documents and drop them.
+        from backend.services.qa_provider import claude_content
+        sent = claude_content(payload)
+        self.assertIn('Northwind Labs may transfer only with the Provider', sent)
+        self.assertIn('without the prior written consent of Provider', sent)
+        self.assertIn('other_claims_in_this_answer', sent)
+        draft_sent = claude_content(mocked.call_args_list[0].args[1])
+        self.assertTrue(draft_sent.startswith('<documents>') and '<question>' in draft_sent)
 
     def test_role_lines_are_defined_parties(self):
         r = record(blocks=[{'id': '1', 'locator': 'Line 1', 'text': 'Provider: Fern Example Materials'}])

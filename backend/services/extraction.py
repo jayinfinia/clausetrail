@@ -37,6 +37,8 @@ def validate_value(field, value):
 def _bad_date():
     raise ValueError('Use an unambiguous ISO date YYYY-MM-DD')
 
+INSTRUCTION_LIKE = re.compile(r'\b(?:ignore|disregard|forget|override)\b.{0,40}\b(?:instructions?|rules?|prompts?|above|previous|prior)\b', re.I)
+
 def extract(blocks):
     proposed = {}
     for field, label in LABELS.items():
@@ -44,6 +46,10 @@ def extract(blocks):
         for block in blocks:
             for match in re.finditer(r'(?:^|\n)\s*'+label+r'\s*:\s*([^\n]+)', block['text'], re.I):
                 raw = match.group(1).strip()
+                if INSTRUCTION_LIKE.search(raw):
+                    # Text that reads like an instruction to the system is never proposed as a value.
+                    matches.append({'value': None, 'raw': raw[:120], 'evidence': block['id'], 'state': 'ambiguous', 'method': 'exact-label', 'note': 'Looks like an instruction, not a value; check the document.'})
+                    continue
                 try:
                     value = validate_value(field, raw)
                     state = 'proposed' if value is not None else 'unknown'

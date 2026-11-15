@@ -281,8 +281,10 @@ def _attr(value):
 
 def claude_content(payload):
     """User message for Claude: documents first as XML, the question last (Anthropic long-context guidance).
-    Payloads without documents (the support check) stay JSON."""
-    if not isinstance(payload,dict) or 'documents' not in payload:
+    Only the drafting payload (documents that carry passages) is laid out this way; anything else, such as the
+    support check's claims and evidence, is sent as JSON so no field is dropped."""
+    docs=payload.get('documents') if isinstance(payload,dict) else None
+    if not isinstance(docs,list) or not any(isinstance(d,dict) and d.get('passages') for d in docs) or set(payload)-{'question','documents','coverage'}:
         return json.dumps(payload,ensure_ascii=False)
     out=['<documents>']
     for i,doc in enumerate(payload['documents'],1):

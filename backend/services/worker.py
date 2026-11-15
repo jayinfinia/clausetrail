@@ -60,13 +60,19 @@ def process_one():
                     tag_info = {'status':'skipped','reason':'Not sent to Claude: this real document was not redacted locally on import.'}
                 else:
                     try:
-                        claude_props, tag_labels = tagging.tag(parsed['blocks'], filename, rel_path, validate_value)
+                        claude_props, tag_labels, sent = tagging.tag(parsed['blocks'], filename, rel_path, validate_value)
                         for field, prop in claude_props.items():
                             if proposals.get(field,{}).get('state') in (None,'unknown'):
                                 proposals[field] = prop
                         tag_info = {'status':'done','model':tagging.model(),'fields':len(claude_props)}
+                        if sent.get('truncated'):
+                            tag_info['warning'] = (f"Long document: Claude saw {sent['passages_sent']} of {sent['passages_total']} passages "
+                                                   '(the opening and those mentioning dates and terms). Check the remaining text for terms.')
                     except tagging.TaggingUnavailable as exc:
                         tag_info = {'status':'failed','reason':str(exc)}
+                    except Exception:
+                        # A tagging fault must not fail the import; the document stays reviewable. Fixed text only.
+                        tag_info = {'status':'failed','reason':'Claude tagging failed unexpectedly; review the fields by hand.'}
         with Session() as db:
             job, record=db.get(Job,jid),db.get(Record,rid)
             if record and not record.deleted:

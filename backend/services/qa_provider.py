@@ -7,9 +7,12 @@ ANTHROPIC_API_KEY are both set. The destination is fixed to api.anthropic.com in
 environment proxies are ignored, it is refused outright in a private local copy (real
 documents), and a daily call limit (QA_DAILY_LIMIT, default 200 model calls) caps spend.
 """
+import html
 import json
 import os
+import random
 import re
+import time
 from urllib.parse import urlparse
 import httpx
 
@@ -26,22 +29,61 @@ def api_error_reason(response):
 
 def tool_instruction(name):
     """Newer Claude models reject a forced tool_choice, so the request uses tool_choice auto plus this instruction."""
-    return f'\n\nRespond only by calling the `{name}` tool exactly once with your complete response. Do not reply in plain text.'
+    return (f'\n\nRespond only by calling the `{name}` tool exactly once, with your complete response as its input. '
+            'Do not reply in plain text, and do not wrap the input in another object.')
 
-def structured_reply(content, name):
-    """The input of the named tool call; failing that, a JSON object written as plain text (with or without a code fence)."""
-    for part in content or []:
-        if part.get('type')=='tool_use' and part.get('name')==name and isinstance(part.get('input'),dict):
-            return part['input']
-    text=' '.join(part.get('text','') for part in content or [] if part.get('type')=='text')
-    match=re.search(r'\{.*\}',text,re.S)
-    if match:
+# Keys a model sometimes wraps its real answer in: {"input": {...}}, {"parameters": "{...}"}, {"name": ..., "arguments": ...}.
+WRAPPERS=('input','parameters','arguments','response','result','output','data')
+ENVELOPE=set(WRAPPERS)|{'name','type','id'}
+
+def _unwrap(value,keys=()):
+    for _ in range(3):
+        if not isinstance(value,dict) or (keys and set(keys)&value.keys()):break
+        if not (keys or set(value)<=ENVELOPE):break
+        inner=[value[k] for k in WRAPPERS if k in value]
+        if len(inner)!=1:break
+        inner=inner[0]
+        if isinstance(inner,str):
+            try:
+                inner=json.loads(inner)
+            except ValueError:
+                break
+        if not isinstance(inner,dict):break
+        value=inner
+    return value
+
+def _json_objects(text):
+    """Every JSON object that can be decoded starting at a '{' in text, outermost first (prose and fences are skipped)."""
+    decoder=json.JSONDecoder(); out=[]; i=text.find('{')
+    while i!=-1:
         try:
-            value=json.loads(match.group())
-            if isinstance(value,dict):return value
+            value,end=decoder.raw_decode(text,i)
         except ValueError:
-            pass
-    return None
+            i=text.find('{',i+1);continue
+        if isinstance(value,dict):out.append(value)
+        i=text.find('{',end)
+    return out
+
+def structured_reply(content,name,keys=()):
+    """The input of the tool call; failing that, a JSON object written as plain text (with or without prose or a
+    code fence). A single tool call under another name and answers wrapped in {"input": ...} are accepted: only one
+    tool is offered and the content is validated by the caller either way. keys are the schema's required keys,
+    used to pick the right object when the text holds several."""
+    parts=[p for p in content or [] if isinstance(p,dict)] if isinstance(content,list) else []
+    calls=[p for p in parts if p.get('type')=='tool_use' and isinstance(p.get('input'),(dict,str))]
+    chosen=[p for p in calls if p.get('name')==name] or (calls if len(calls)==1 else [])
+    for part in chosen:
+        value=part['input']
+        if isinstance(value,str):
+            value=next(iter(_json_objects(value)),None)
+        value=_unwrap(value,keys)
+        if isinstance(value,dict) and value:return value
+    text=' '.join(str(p.get('text') or '') for p in parts if p.get('type')=='text')
+    found=[_unwrap(v,keys) for v in _json_objects(text)]
+    found=[v for v in found if isinstance(v,dict)]
+    if keys:
+        found=[v for v in found if set(keys)&v.keys()] or found
+    return found[0] if found else None
 
 class ModelUnavailable(Exception):
     pass
@@ -153,13 +195,16 @@ def daily_limit():
     except ValueError:
         return 200
 
+def calls_left():
+    return daily_limit()-_calls_today()
+
 def _claude_readiness():
     base={'configured':True,'provider':'Claude (fictional demo)','model':model_name() or None}
     if private_local():
         return {**base,'ready':False,'reason':'Claude answers are disabled in a private local copy; use a local Ollama model for real documents.'}
     if not os.getenv('ANTHROPIC_API_KEY'):
         return {**base,'configured':False,'ready':False,'reason':'Set ANTHROPIC_API_KEY to use Claude answers.'}
-    left=daily_limit()-_calls_today()
+    left=calls_left()
     if left<=0:
         return {**base,'ready':False,'reason':'Daily Claude call limit reached; evidence search still works. It resets tomorrow.'}
     return {**base,'ready':True,'reason':None,'calls_left_today':left}
@@ -177,23 +222,102 @@ def _inline_refs(schema):
         return node
     return walk(schema)
 
+RETRY_STATUS={429,500,502,503,504,529}  # rate limited, overloaded or a transient server error: not billed
+MAX_ATTEMPTS=3
+MAX_WAIT=30
+_sleep=time.sleep
+
+def _wait(response,attempt):
+    """Seconds before the next attempt: the server's retry-after when given (capped), else exponential backoff."""
+    try:
+        value=float(response.headers.get('retry-after')) if response is not None else None
+    except (TypeError,ValueError):
+        value=None
+    return min(MAX_WAIT,value if value is not None and value>=0 else 2**attempt+random.random())
+
+def claude_messages(body,api_key,count=True):
+    """POST one Messages request to the fixed Anthropic endpoint and return the decoded reply.
+
+    Retries a rate-limited, overloaded or failed connection up to MAX_ATTEMPTS times, honouring retry-after.
+    Only attempts the API accepted for processing count against the daily limit (count=True). Raises
+    ModelUnavailable with a fixed message plus Anthropic's short error reason; never includes or logs request
+    or response bodies."""
+    headers={'x-api-key':api_key,'anthropic-version':'2023-06-01','content-type':'application/json'}
+    response=None
+    for attempt in range(MAX_ATTEMPTS):
+        if attempt:_sleep(_wait(response,attempt))
+        try:
+            with httpx.Client(timeout=httpx.Timeout(120,connect=10),trust_env=False,follow_redirects=False) as client:
+                response=client.post(CLAUDE_URL,json=body,headers=headers)
+        except (httpx.ConnectError,httpx.ConnectTimeout):
+            response=None
+            if attempt+1<MAX_ATTEMPTS:continue
+            raise ModelUnavailable('Could not reach Claude. Check the network and retry.') from None
+        except httpx.TimeoutException:
+            if count:_record_call()  # the request was accepted and may have been processed
+            raise ModelUnavailable('Claude did not respond in time. Try a narrower question or retry.') from None
+        except httpx.HTTPError:
+            raise ModelUnavailable('Could not reach Claude. Check the network and retry.') from None
+        if response.status_code in RETRY_STATUS:
+            if attempt+1<MAX_ATTEMPTS:continue
+            raise ModelUnavailable(f'Claude is busy ({response.status_code}){api_error_reason(response)}. Wait a minute and retry.')
+        if count:_record_call()
+        if response.status_code!=200:
+            raise ModelUnavailable(f'Claude request failed ({response.status_code}){api_error_reason(response)}')  # never log request bodies
+        try:
+            reply=response.json()
+        except ValueError:
+            reply=None
+        if not isinstance(reply,dict):
+            raise ModelResponseError('Claude returned an unreadable response')
+        return reply
+
+def _neutral(text):
+    # Passage text cannot close or open the structure it sits in; everything else is sent exactly as stored.
+    return re.sub(r'<(/?)(documents?|passage|question|coverage|claim|evidence)\b',r'‹\1\2',str(text),flags=re.I)
+
+def _attr(value):
+    return html.escape(str(value),quote=True)
+
+def claude_content(payload):
+    """User message for Claude: documents first as XML, the question last (Anthropic long-context guidance).
+    Payloads without documents (the support check) stay JSON."""
+    if not isinstance(payload,dict) or 'documents' not in payload:
+        return json.dumps(payload,ensure_ascii=False)
+    out=['<documents>']
+    for i,doc in enumerate(payload['documents'],1):
+        meta={k:v for k,v in doc.items() if k not in ('document','passages')}
+        out.append(f'<document index="{i}" name="{_attr(doc.get("document",""))}">')
+        if meta:out.append('<document_metadata>'+_neutral(json.dumps(meta,ensure_ascii=False))+'</document_metadata>')
+        for p in doc.get('passages',[]):
+            out.append(f'<passage source_id="{_attr(p["source_id"])}" location="{_attr(p.get("location",""))}">\n{_neutral(p["text"])}\n</passage>')
+        out.append('</document>')
+    out.append('</documents>')
+    if payload.get('coverage'):out.append('<coverage>'+_neutral(payload['coverage'])+'</coverage>')
+    out.append('<question>'+_neutral(payload.get('question',''))+'</question>')
+    out.append('Answer the question using only the passages above. Cite passages by their source_id.')
+    return '\n'.join(out)
+
+MAX_TOKENS=4096
+MAX_TOKENS_RETRY=8192
+
 def _claude_chat(system,payload,schema):
     status=_claude_readiness()
     if not status['ready']:
         raise ModelUnavailable(status['reason'])
     tool={'name':'respond','description':'Return the structured response.','input_schema':_inline_refs(schema)}
-    body={'model':model_name(),'max_tokens':2000,'system':system+tool_instruction('respond'),'tools':[tool],
+    body={'model':model_name(),'max_tokens':MAX_TOKENS,'system':system+tool_instruction('respond'),'tools':[tool],
           'tool_choice':{'type':'auto'},
-          'messages':[{'role':'user','content':json.dumps(payload,ensure_ascii=False)}]}
-    _record_call()
-    try:
-        with httpx.Client(timeout=httpx.Timeout(120,connect=10),trust_env=False,follow_redirects=False) as client:
-            response=client.post(CLAUDE_URL,json=body,headers={'x-api-key':os.environ['ANTHROPIC_API_KEY'],'anthropic-version':'2023-06-01','content-type':'application/json'})
-    except httpx.HTTPError:
-        raise ModelUnavailable('Could not reach Claude. Check the network and retry.') from None
-    if response.status_code!=200:
-        raise ModelUnavailable(f'Claude request failed ({response.status_code}){api_error_reason(response)}')  # never log request bodies
-    result=structured_reply(response.json().get('content'),'respond')
+          'messages':[{'role':'user','content':claude_content(payload)}]}
+    reply=claude_messages(body,os.environ['ANTHROPIC_API_KEY'])
+    if reply.get('stop_reason')=='max_tokens':
+        # A cut-off reply is never parsed. Ask once more with room for the whole answer, within the daily limit.
+        if not _claude_readiness()['ready']:
+            raise ModelResponseError('Claude response was cut off and the daily limit is reached')
+        reply=claude_messages({**body,'max_tokens':MAX_TOKENS_RETRY},os.environ['ANTHROPIC_API_KEY'])
+        if reply.get('stop_reason')=='max_tokens':
+            raise ModelResponseError('Claude response was too long; narrow the question or pick fewer agreements')
+    result=structured_reply(reply.get('content'),'respond',tuple(schema.get('required') or ()))
     if result is None:
         raise ModelResponseError('Claude returned no structured response')
     return result

@@ -49,5 +49,5 @@
   },
   "skipped_true_boilerplate_matches": 2,
   "limit": "This checks that a quote exists in the source. It cannot tell whether a claim interprets a real quote correctly; that is the job of the separate support-check model call, measured by the live stage.",
-  "seconds": 17.4
+  "seconds": 32.8
 }

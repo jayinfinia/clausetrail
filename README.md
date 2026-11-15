@@ -125,7 +125,7 @@ python scripts/start.py
 
 ```sh
 pip install -r requirements-dev.txt
-python -m unittest discover -s tests -v       # 176 tests
+python -m unittest discover -s tests -v       # 213 tests
 npm ci --prefix frontend && npm run build --prefix frontend
 python -m scripts.smoke http://localhost:8000  # live HTTP flow against a running demo
 ```

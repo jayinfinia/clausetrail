@@ -37,7 +37,14 @@ class GroundingTests(unittest.TestCase):
         self.assertFalse(result['citations']);self.assertFalse(result['claims'])
     def test_supported_quote_wrong_interpretation_rejected(self):
         result,_=self.run_ai(draft(text='Materials may be transferred without permission.'),{'verdicts':[{'claim_index':0,'check':'fixture','supported':False,'answers_question':True}]})
-        self.assertEqual(result['status'],'insufficient_evidence')
+        # The rejected sentence is never shown; only the verified verbatim span, under its own status.
+        self.assertEqual(result['status'],'quoted_evidence');self.assertFalse(result['claims'])
+        self.assertNotIn('without permission',json.dumps(result))
+        self.assertEqual(result['citations'][0]['text'],'must obtain prior written consent before transferring materials to a third party')
+        self.assertEqual(result['diagnostics']['unsupported'],1)
+    def test_off_question_unsupported_claim_shows_nothing(self):
+        result,_=self.run_ai(draft(text='Materials may be transferred without permission.'),{'verdicts':[{'claim_index':0,'check':'fixture','supported':False,'answers_question':False}]})
+        self.assertEqual(result['status'],'insufficient_evidence');self.assertFalse(result['citations'])
     def test_unrelated_answer_rejected(self):
         result,_=self.run_ai(draft(),{'verdicts':[{'claim_index':0,'check':'fixture','supported':True,'answers_question':False}]})
         self.assertFalse(result['claims'])
@@ -51,7 +58,9 @@ class GroundingTests(unittest.TestCase):
         result,mock=self.run_ai(draft(text='Consent must be requested 90 days in advance.'))
         self.assertFalse(result['claims']);self.assertEqual(mock.call_count,1)
     def test_malformed_schema_is_an_error(self):
-        with self.assertRaises(qa_provider.ModelResponseError):self.run_ai({'answer':'Trust me'})
+        with patch.dict(os.environ,{'QA_MODEL':'test-model'}),patch('backend.services.qa_provider.chat',side_effect=[{'answer':'Trust me'}]*2) as mocked:
+            with self.assertRaises(qa_provider.ModelResponseError):ask('Can materials be transferred to a third party?',[record()],mode='ai')
+        self.assertEqual(mocked.call_count,2)  # one retry for an unreadable reply, then an error
     def test_string_boolean_is_not_accepted(self):
         with self.assertRaises(qa_provider.ModelResponseError):self.run_ai(draft(),{'verdicts':[{'claim_index':0,'check':'fixture','supported':'true','answers_question':True}]})
     def test_claude_shaped_reply_is_normalized_not_trusted(self):

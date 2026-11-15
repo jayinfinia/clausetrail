@@ -37,7 +37,8 @@
 | `backend/redaction/` | Detection rules, local-model detector, file engines (scanned PDF pixels are burned, text PDFs truly redacted), scoring |
 | `backend/services/parsers.py`, `worker.py` | Bounded parsing and the leased job queue with retries and cleanup |
 | `backend/services/extraction.py` | Conservative exact-label extraction; abstains otherwise |
-| `backend/tagging.py` | Optional Claude tagging: forced tool schema, fixed destination, redacted text only, quote grounding |
+| `backend/tagging.py` | Optional Claude tagging: tool schema, fixed destination, redacted text only, quote grounding, instruction-like values dropped |
+| `backend/services/quotes.py` | Typography-tolerant quote matching and the number/date literal check |
 | `backend/services/retrieval.py` | Lexical retrieval with synonym expansion, per-document caps and reserved opening passages |
 | `backend/services/grounded_qa.py` | Structured synthesis, exact-quote and numeric-literal checks, per-claim support check, conflict warnings |
 | `backend/services/queries.py` | Deterministic count and date reports over reviewed facts (no model) |
@@ -49,7 +50,7 @@
 ## Design rules
 
 - **Nothing automatic is a fact.** Extraction, tagging and folder hints produce proposals. Facts become approved only when a reviewer accepts them with a supporting passage, and deadlines count only reviewer-confirmed executed agreements.
-- **Every claim is quoted.** A model claim survives only if each quote occurs verbatim (whitespace aside) in the cited passage, every number or date in the claim appears in the cited text, and a separate support-check call agrees the evidence supports the claim and answers the question. Status (answered, partial, conflicting, insufficient evidence) is computed by the server, never taken from the model.
+- **Every claim is quoted.** A model claim survives only if each quote occurs verbatim (whitespace and quote/dash glyphs aside; see docs/AI_QA.md) in the cited passage, every number or date in the claim appears in the cited text (or is a stated period after a stated date, flagged as computed), and a separate support-check call agrees the evidence supports the claim and answers the question. Status (answered, partial, conflicting, insufficient evidence) is computed by the server, never taken from the model.
 - **Access is checked before retrieval and again after inference.** Sources deleted, revised or made inaccessible during inference are dropped, and citation inspection revalidates them again.
 - **No data egress by default.** Question answering talks to a local Ollama host, rejects cloud model names and ignores proxy settings. Two opt-in exceptions, both with destinations fixed in code: Claude can write answers in the fictional demo (refused in private mode, daily call cap), and Claude tagging receives only locally redacted text.
 - **Counts and dates are not left to the model.** Questions such as "what expires next quarter" are answered from the reviewed register.

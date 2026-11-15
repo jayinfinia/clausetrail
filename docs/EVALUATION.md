@@ -98,6 +98,8 @@ Every claim a model makes must carry a quote that occurs in the cited passage. E
 
 Two borrowed clauses were skipped because the identical boilerplate really does appear in the target contract, where accepting it would be correct.
 
+**Typography tolerance (November 2026).** The matcher now also accepts quote and dash glyph differences, soft hyphens, zero-width characters, words hyphenated across a line break, and "..." elisions (cited as the full original span). Rerunning this stage gives identical numbers to the table above: all genuine and re-wrapped quotes accepted, and 0 of the 6,461 altered or borrowed quotes accepted. An ad-hoc run on the same spans (not part of `eval/cuad_eval.py`) accepted 714 of 714 spans with straight quotes converted to curly ones, which exact matching rejected, and 1,631 of 1,826 spans of 12+ words shortened to their first four and last four words around "..." (the rest elide more than 600 characters, the limit); every accepted elision was cited as the full original span.
+
 **Limit.** This check is exact matching, so these results show that it is implemented correctly on long, messy real text, not that answers are right. A model can quote a real sentence and still misread it. That is what the separate support-check call is for, and it can only be measured with a model (section 5).
 
 ## 3. Redaction (standard policy, rules only)

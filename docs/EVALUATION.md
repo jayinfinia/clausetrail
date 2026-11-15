@@ -37,7 +37,7 @@ python -m eval.cuad_eval retrieval --cuad .local/cuad/data --split dev     # tun
 
 ## 1. Retrieval
 
-**Question.** For each CUAD question with at least one annotated answer, the question is phrased as *"What does the contract say about governing law? Which state/country's law governs the interpretation of the contract?"* (category name plus CUAD's own description). The contract is split exactly like the app's text importer, one block per line.
+**Question.** For each CUAD question with at least one annotated answer, the question is phrased as *"What does the contract say about governing law? Which state/country's law governs the interpretation of the contract?"* (category name plus CUAD's own description). The contract is split exactly like the app's text importer, one block per line. (Since the import hardening change the app also splits lines over 2,000 characters into sentence-aligned parts; the evaluation replica does not, and the figures here were not re-measured with that split. Retrieval already reads blocks in 1,800-character windows, so the effect is limited to window boundaries on very long lines.)
 
 **Metric.** A question is a *hit* when at least one passage sent to the model overlaps a lawyer-annotated answer span. *All spans* requires every annotated span to be covered. Baselines get exactly the same number of characters Clausetrail used for that question.
 

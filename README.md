@@ -32,7 +32,7 @@ The end-to-end sample is small (95% intervals of roughly ±20 points); the main 
 
 ## Features
 
-- **Import** PDF (text and scanned, via OCR), DOCX, XLSX, CSV and TXT by drag and drop or whole folders, with bounded parsers, a durable job queue, retries and cleanup.
+- **Import** PDF (text and scanned, via OCR), DOCX, XLSX, CSV and TXT by drag and drop or whole folders, with bounded parsers, a durable job queue, retries and cleanup. Documents are split into paragraph and clause blocks so citations point at a passage, not a page (`Page 2, paragraph 3`; `Paragraph 7 (under "Term")`; `Table 1, row 2`). Running headers, footers and page numbers are dropped from PDFs, wrapped and hyphenated lines are re-joined, Word list numbers and accepted tracked changes are kept, and low OCR confidence, tilted scans, tracked changes and non-UTF-8 text are shown as import warnings on the agreement. Agreement trackers (a header row with columns such as Counterparty, Expiration, Owner) are not imported as agreements; they belong in tracker reconciliation. Password-protected files, `.doc`, `.rtf`, `.pages` and other unsupported formats are rejected with a message saying what to do.
 - **Review queue** with evidence selection, reviewer notes, revisions and explicit execution confirmation.
 - **Deadlines**: expiration, notice, confidentiality-end and return dates; reviewed amendments update their parent agreement.
 - **Ask agreements**: cited answers with claim-level source buttons and an evidence inspector, or evidence-only search without a model. Count and date questions ("what expires next quarter?") use the reviewed register.
@@ -79,7 +79,7 @@ pip install -r backend/requirements.txt
 python scripts/start.py --open
 ```
 
-For scanned PDFs install Tesseract and Poppler (`brew install tesseract poppler`, or `apt install tesseract-ocr poppler-utils`). Node 22+ is only needed to change the interface; a built copy is committed.
+For scanned PDFs install Tesseract and Poppler (`brew install tesseract poppler`, or `apt install tesseract-ocr poppler-utils`). Pages are rendered at 300 DPI and read with automatic page segmentation. Node 22+ is only needed to change the interface; a built copy is committed.
 
 ### Docker and PostgreSQL
 
@@ -125,7 +125,7 @@ python scripts/start.py
 
 ```sh
 pip install -r requirements-dev.txt
-python -m unittest discover -s tests -v       # 155 tests
+python -m unittest discover -s tests -v       # 176 tests
 npm ci --prefix frontend && npm run build --prefix frontend
 python -m scripts.smoke http://localhost:8000  # live HTTP flow against a running demo
 ```

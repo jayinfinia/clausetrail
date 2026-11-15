@@ -311,6 +311,18 @@ class NamedAgreementTests(unittest.TestCase):
         self.assertEqual({h['agreement_id'] for h in hits},{'a'})
         hits,_=retrieve('Can the recipient share information?',[willow,lark])  # no name: both stay in scope
         self.assertEqual({h['agreement_id'] for h in hits},{'a','b'})
+    def test_party_with_several_agreements_is_still_named(self):
+        from types import SimpleNamespace
+        def doc(rid,name,text,party):
+            return SimpleNamespace(id=rid,filename=name,blocks=[{'id':'1','locator':'Page 1','text':text}],source_version='v',digest=rid,revision=1,executed=False,parent_id=None,approved={'counterparty':{'value':party}},proposals={})
+        lark=[doc(f'l{i}',f'0{i}-mta.txt',f'Lark Fictional Labs material transfer {i}. This agreement expires on 2027-0{i}-01.','Lark Fictional Labs') for i in range(1,4)]
+        nimbus=doc('n','15-mta.txt','Nimbus Example materials must be destroyed at the end of the term.','Nimbus Example')
+        others=[doc(f'o{i}',f'{20+i}-cda.txt',f'Other Party {i} confidentiality terms.',f'Other Party {i}') for i in range(8)]
+        hits,_=retrieve('Compare what happens to the materials at the end of the Lark and Nimbus agreements.',[*lark,nimbus,*others])
+        self.assertEqual({h['agreement_id'] for h in hits},{'l1','l2','l3','n'})
+        hits,_=retrieve('When does the Lark MTA expire?',[*lark,nimbus,*others])
+        self.assertTrue(all('expires' in h['text'] for h in hits if h['agreement_id'].startswith('l')))
+        self.assertEqual({h['agreement_id'] for h in hits},{'l1','l2','l3'})
     def test_common_words_do_not_name_an_agreement(self):
         # "materials" is in Fern Example Materials but also in every document's text.
         hits,_=retrieve('What can the recipient use the materials for?',self.corpus())

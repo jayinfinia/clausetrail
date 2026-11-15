@@ -22,7 +22,7 @@ Evaluated on the official test split of [CUAD](https://www.atticusprojectai.org/
 
 | Stage | Result |
 |---|---|
-| Retrieval: the annotated clause reaches the model | **89.5%** of 1,244 questions (55.2% before tuning; 55.5% for "first pages" and 50.6% for random passages at the same budget) |
+| Retrieval: the annotated clause reaches the model | **90.2%** of 1,244 questions (55.2% at the first measurement; 55.2% for "first pages" and 50.4% for random passages at the same budget) |
 | Quote check: altered or borrowed quotes accepted | **0 of 6,461** (genuine quotes rejected: 0 of 4,862) |
 | Redaction: injected SSNs, tax IDs, card and account numbers, birth dates caught | **1,326 of 1,326**, with 9 flags on 4.8M characters of clean text, all real account or tax numbers |
 | Default extractor on real contracts | Abstains on 99.7% of fields instead of guessing |

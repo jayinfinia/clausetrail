@@ -21,74 +21,74 @@
   "whole_document_sent_rate": 13.2,
   "summary": {
     "clausetrail": {
-      "question_hit_rate": 89.5,
-      "question_all_spans_rate": 78.1,
-      "span_recall": 78.3,
-      "median_chars_sent": 19589.0,
+      "question_hit_rate": 90.2,
+      "question_all_spans_rate": 79.0,
+      "span_recall": 79.6,
+      "median_chars_sent": 19638.5,
       "median_passages_sent": 34.0
     },
     "clausetrail_v1": {
-      "question_hit_rate": 55.2,
-      "question_all_spans_rate": 42.6,
-      "span_recall": 39.2,
-      "median_chars_sent": 3076.5,
+      "question_hit_rate": 58.2,
+      "question_all_spans_rate": 45.2,
+      "span_recall": 42.0,
+      "median_chars_sent": 3157.0,
       "median_passages_sent": 3.0
     },
     "no_opening": {
-      "question_hit_rate": 82.2,
-      "question_all_spans_rate": 71.3,
-      "span_recall": 69.7,
-      "median_chars_sent": 19815.0,
-      "median_passages_sent": 26.5
+      "question_hit_rate": 82.6,
+      "question_all_spans_rate": 72.3,
+      "span_recall": 70.6,
+      "median_chars_sent": 19826.0,
+      "median_passages_sent": 26.0
     },
     "opening_3000_chars": {
-      "question_hit_rate": 85.7,
-      "question_all_spans_rate": 76.0,
-      "span_recall": 75.0,
-      "median_chars_sent": 19389.0,
+      "question_hit_rate": 85.8,
+      "question_all_spans_rate": 76.8,
+      "span_recall": 75.9,
+      "median_chars_sent": 19457.0,
       "median_passages_sent": 36.0
     },
     "first_passages": {
-      "question_hit_rate": 55.5,
+      "question_hit_rate": 55.2,
       "question_all_spans_rate": 50.2,
       "span_recall": 49.1
     },
     "random_passages": {
-      "question_hit_rate": 50.6,
-      "question_all_spans_rate": 39.1,
-      "span_recall": 39.5
+      "question_hit_rate": 50.4,
+      "question_all_spans_rate": 39.0,
+      "span_recall": 39.2
     }
   },
   "by_category": [
     {
+      "category": "No-Solicit Of Customers",
+      "questions": 7,
+      "clausetrail": 57.1,
+      "clausetrail_v1": 57.1,
+      "first_passages": 57.1,
+      "random_passages": 28.6
+    },
+    {
       "category": "Non-Disparagement",
       "questions": 7,
       "clausetrail": 57.1,
-      "clausetrail_v1": 28.6,
+      "clausetrail_v1": 57.1,
       "first_passages": 14.3,
       "random_passages": 28.6
     },
     {
       "category": "Revenue/Profit Sharing",
       "questions": 35,
-      "clausetrail": 62.9,
-      "clausetrail_v1": 22.9,
+      "clausetrail": 60.0,
+      "clausetrail_v1": 20.0,
       "first_passages": 51.4,
       "random_passages": 48.6
-    },
-    {
-      "category": "Ip Ownership Assignment",
-      "questions": 23,
-      "clausetrail": 65.2,
-      "clausetrail_v1": 43.5,
-      "first_passages": 39.1,
-      "random_passages": 56.5
     },
     {
       "category": "Affiliate License-Licensor",
       "questions": 6,
       "clausetrail": 66.7,
-      "clausetrail_v1": 50.0,
+      "clausetrail_v1": 16.7,
       "first_passages": 33.3,
       "random_passages": 50.0
     },
@@ -104,57 +104,57 @@
       "category": "Competitive Restriction Exception",
       "questions": 16,
       "clausetrail": 68.8,
-      "clausetrail_v1": 37.5,
+      "clausetrail_v1": 31.2,
       "first_passages": 50.0,
       "random_passages": 18.8
     },
     {
-      "category": "No-Solicit Of Employees",
-      "questions": 10,
-      "clausetrail": 70.0,
-      "clausetrail_v1": 40.0,
-      "first_passages": 40.0,
-      "random_passages": 70.0
-    },
-    {
-      "category": "No-Solicit Of Customers",
-      "questions": 7,
-      "clausetrail": 71.4,
-      "clausetrail_v1": 57.1,
-      "first_passages": 57.1,
-      "random_passages": 28.6
-    },
-    {
-      "category": "Exclusivity",
-      "questions": 33,
-      "clausetrail": 72.7,
-      "clausetrail_v1": 33.3,
-      "first_passages": 63.6,
-      "random_passages": 39.4
-    },
-    {
       "category": "Volume Restriction",
       "questions": 17,
-      "clausetrail": 76.5,
+      "clausetrail": 70.6,
       "clausetrail_v1": 17.6,
       "first_passages": 58.8,
       "random_passages": 47.1
     },
     {
-      "category": "Minimum Commitment",
-      "questions": 32,
-      "clausetrail": 78.1,
-      "clausetrail_v1": 40.6,
-      "first_passages": 56.2,
-      "random_passages": 59.4
+      "category": "Joint Ip Ownership",
+      "questions": 7,
+      "clausetrail": 71.4,
+      "clausetrail_v1": 42.9,
+      "first_passages": 0.0,
+      "random_passages": 28.6
+    },
+    {
+      "category": "Ip Ownership Assignment",
+      "questions": 23,
+      "clausetrail": 73.9,
+      "clausetrail_v1": 39.1,
+      "first_passages": 39.1,
+      "random_passages": 56.5
     },
     {
       "category": "Covenant Not To Sue",
       "questions": 24,
-      "clausetrail": 79.2,
-      "clausetrail_v1": 33.3,
+      "clausetrail": 75.0,
+      "clausetrail_v1": 45.8,
       "first_passages": 20.8,
       "random_passages": 29.2
+    },
+    {
+      "category": "Liquidated Damages",
+      "questions": 14,
+      "clausetrail": 78.6,
+      "clausetrail_v1": 50.0,
+      "first_passages": 28.6,
+      "random_passages": 35.7
+    },
+    {
+      "category": "Exclusivity",
+      "questions": 33,
+      "clausetrail": 78.8,
+      "clausetrail_v1": 51.5,
+      "first_passages": 63.6,
+      "random_passages": 39.4
     },
     {
       "category": "Warranty Duration",
@@ -165,20 +165,20 @@
       "random_passages": 70.0
     },
     {
+      "category": "No-Solicit Of Employees",
+      "questions": 10,
+      "clausetrail": 80.0,
+      "clausetrail_v1": 50.0,
+      "first_passages": 40.0,
+      "random_passages": 70.0
+    },
+    {
       "category": "Document Name",
       "questions": 102,
       "clausetrail": 82.4,
-      "clausetrail_v1": 28.4,
+      "clausetrail_v1": 29.4,
       "first_passages": 85.3,
-      "random_passages": 52.9
-    },
-    {
-      "category": "Non-Compete",
-      "questions": 23,
-      "clausetrail": 82.6,
-      "clausetrail_v1": 26.1,
-      "first_passages": 39.1,
-      "random_passages": 65.2
+      "random_passages": 53.9
     },
     {
       "category": "Third Party Beneficiary",
@@ -189,68 +189,36 @@
       "random_passages": 33.3
     },
     {
-      "category": "Liquidated Damages",
-      "questions": 14,
-      "clausetrail": 85.7,
-      "clausetrail_v1": 50.0,
-      "first_passages": 28.6,
-      "random_passages": 42.9
-    },
-    {
-      "category": "Joint Ip Ownership",
-      "questions": 7,
-      "clausetrail": 85.7,
-      "clausetrail_v1": 42.9,
-      "first_passages": 0.0,
-      "random_passages": 28.6
+      "category": "Minimum Commitment",
+      "questions": 32,
+      "clausetrail": 84.4,
+      "clausetrail_v1": 43.8,
+      "first_passages": 56.2,
+      "random_passages": 62.5
     },
     {
       "category": "Post-Termination Services",
       "questions": 29,
       "clausetrail": 86.2,
-      "clausetrail_v1": 48.3,
+      "clausetrail_v1": 51.7,
       "first_passages": 34.5,
       "random_passages": 51.7
     },
     {
-      "category": "Notice Period To Terminate Renewal",
-      "questions": 16,
-      "clausetrail": 87.5,
-      "clausetrail_v1": 81.2,
-      "first_passages": 62.5,
-      "random_passages": 37.5
+      "category": "Non-Compete",
+      "questions": 23,
+      "clausetrail": 87.0,
+      "clausetrail_v1": 39.1,
+      "first_passages": 34.8,
+      "random_passages": 65.2
     },
     {
       "category": "Rofr/Rofo/Rofn",
       "questions": 17,
       "clausetrail": 88.2,
-      "clausetrail_v1": 64.7,
+      "clausetrail_v1": 58.8,
       "first_passages": 41.2,
       "random_passages": 41.2
-    },
-    {
-      "category": "Insurance",
-      "questions": 32,
-      "clausetrail": 90.6,
-      "clausetrail_v1": 56.2,
-      "first_passages": 28.1,
-      "random_passages": 56.2
-    },
-    {
-      "category": "Cap On Liability",
-      "questions": 44,
-      "clausetrail": 90.9,
-      "clausetrail_v1": 68.2,
-      "first_passages": 25.0,
-      "random_passages": 50.0
-    },
-    {
-      "category": "Non-Transferable License",
-      "questions": 22,
-      "clausetrail": 90.9,
-      "clausetrail_v1": 72.7,
-      "first_passages": 40.9,
-      "random_passages": 50.0
     },
     {
       "category": "Agreement Date",
@@ -261,44 +229,60 @@
       "random_passages": 46.2
     },
     {
-      "category": "Affiliate License-Licensee",
-      "questions": 12,
-      "clausetrail": 91.7,
-      "clausetrail_v1": 58.3,
-      "first_passages": 41.7,
-      "random_passages": 41.7
-    },
-    {
       "category": "Audit Rights",
       "questions": 38,
       "clausetrail": 92.1,
-      "clausetrail_v1": 68.4,
+      "clausetrail_v1": 78.9,
       "first_passages": 26.3,
       "random_passages": 44.7
+    },
+    {
+      "category": "Uncapped Liability",
+      "questions": 13,
+      "clausetrail": 92.3,
+      "clausetrail_v1": 69.2,
+      "first_passages": 23.1,
+      "random_passages": 46.2
+    },
+    {
+      "category": "Cap On Liability",
+      "questions": 44,
+      "clausetrail": 93.2,
+      "clausetrail_v1": 70.5,
+      "first_passages": 22.7,
+      "random_passages": 47.7
+    },
+    {
+      "category": "Insurance",
+      "questions": 32,
+      "clausetrail": 93.8,
+      "clausetrail_v1": 78.1,
+      "first_passages": 28.1,
+      "random_passages": 56.2
     },
     {
       "category": "License Grant",
       "questions": 50,
       "clausetrail": 94.0,
-      "clausetrail_v1": 58.0,
+      "clausetrail_v1": 66.0,
       "first_passages": 64.0,
       "random_passages": 50.0
+    },
+    {
+      "category": "Expiration Date",
+      "questions": 78,
+      "clausetrail": 96.2,
+      "clausetrail_v1": 78.2,
+      "first_passages": 56.4,
+      "random_passages": 53.8
     },
     {
       "category": "Change Of Control",
       "questions": 26,
       "clausetrail": 96.2,
-      "clausetrail_v1": 80.8,
+      "clausetrail_v1": 76.9,
       "first_passages": 19.2,
       "random_passages": 42.3
-    },
-    {
-      "category": "Governing Law",
-      "questions": 83,
-      "clausetrail": 96.4,
-      "clausetrail_v1": 89.2,
-      "first_passages": 25.3,
-      "random_passages": 44.6
     },
     {
       "category": "Effective Date",
@@ -309,28 +293,36 @@
       "random_passages": 57.1
     },
     {
-      "category": "Expiration Date",
-      "questions": 78,
-      "clausetrail": 97.4,
-      "clausetrail_v1": 82.1,
-      "first_passages": 57.7,
-      "random_passages": 53.8
+      "category": "Governing Law",
+      "questions": 83,
+      "clausetrail": 97.6,
+      "clausetrail_v1": 90.4,
+      "first_passages": 25.3,
+      "random_passages": 44.6
     },
     {
       "category": "Parties",
       "questions": 102,
       "clausetrail": 100.0,
-      "clausetrail_v1": 26.5,
+      "clausetrail_v1": 28.4,
       "first_passages": 100.0,
-      "random_passages": 65.7
+      "random_passages": 63.7
     },
     {
       "category": "Renewal Term",
       "questions": 26,
       "clausetrail": 100.0,
-      "clausetrail_v1": 96.2,
+      "clausetrail_v1": 100.0,
       "first_passages": 65.4,
       "random_passages": 50.0
+    },
+    {
+      "category": "Notice Period To Terminate Renewal",
+      "questions": 16,
+      "clausetrail": 100.0,
+      "clausetrail_v1": 87.5,
+      "first_passages": 62.5,
+      "random_passages": 37.5
     },
     {
       "category": "Termination For Convenience",
@@ -344,23 +336,31 @@
       "category": "Anti-Assignment",
       "questions": 72,
       "clausetrail": 100.0,
-      "clausetrail_v1": 86.1,
+      "clausetrail_v1": 90.3,
       "first_passages": 31.9,
       "random_passages": 54.2
     },
     {
-      "category": "Uncapped Liability",
-      "questions": 13,
+      "category": "Non-Transferable License",
+      "questions": 22,
       "clausetrail": 100.0,
-      "clausetrail_v1": 76.9,
-      "first_passages": 23.1,
-      "random_passages": 46.2
+      "clausetrail_v1": 81.8,
+      "first_passages": 40.9,
+      "random_passages": 50.0
+    },
+    {
+      "category": "Affiliate License-Licensee",
+      "questions": 12,
+      "clausetrail": 100.0,
+      "clausetrail_v1": 66.7,
+      "first_passages": 41.7,
+      "random_passages": 41.7
     },
     {
       "category": "Irrevocable Or Perpetual License",
       "questions": 13,
       "clausetrail": 100.0,
-      "clausetrail_v1": 69.2,
+      "clausetrail_v1": 92.3,
       "first_passages": 46.2,
       "random_passages": 61.5
     },
@@ -381,5 +381,5 @@
       "random_passages": 0.0
     }
   ],
-  "seconds": 26.7
+  "seconds": 48.7
 }

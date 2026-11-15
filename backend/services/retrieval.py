@@ -6,8 +6,19 @@ from collections import Counter
 STOP={'the','and','for','what','which','does','can','are','how','that','this','with','from','about','please','tell','under','have','has','our','their','agreement','agreements'}
 SYNONYMS=[{'redistribute','redistribution','transfer','share','sharing','third','parties'}, {'confidential','confidentiality','disclose','disclosure','secret'}, {'end','expiration','expire','expiry','term','termination'}, {'return','destroy','destruction','dispose','disposal'}, {'consent','approval','permission','permitted'}, {'renew','renewal','extend','extension'}, {'use','uses','purpose','permitted','evaluation','research'}, {'restrictions','restriction','obligations','obligation','recipient','must','prohibited','confidentiality','renewal','permitted'}]
 
+def stem(word):
+    """Light, consistent suffix stripping so 'expires', 'expired', 'expiring' and 'expire' all become 'expir'.
+    Applied to questions and passages alike; conservative with short words and numbers."""
+    if len(word)<=4 or word.isdigit() or word.endswith(('ss','us','is')):return word
+    for suffix,keep in (('ies','y'),('ing',''),('ed',''),('es',''),('s','')):
+        if word.endswith(suffix) and len(word)-len(suffix)>=4:
+            word=word[:-len(suffix)]+keep;break
+    return word[:-1] if word.endswith('e') and len(word)>4 else word
+
 def terms(text):
-    return [word for word in re.findall(r'[a-z0-9]{2,}',text.casefold()) if word not in STOP]
+    return [stem(word) for word in re.findall(r'[a-z0-9]{2,}',text.casefold()) if word not in STOP]
+
+SYNONYMS=[{stem(w) for w in group} for group in SYNONYMS]
 
 def retrieve(question,records,limit=40,budget=20000,per_doc_limit=None,lead_chars=1500):
     """Rank passages for a question within a character budget.
@@ -39,11 +50,12 @@ def retrieve(question,records,limit=40,budget=20000,per_doc_limit=None,lead_char
     for r in records:
         name=str(r.approved.get('counterparty',{}).get('value') or r.proposals.get('counterparty',{}).get('value') or '')
         key=set(terms(name)) - {'fictional','example','demo','labs','lab','research'}
-        distinctive={t for t in key & q if len(t)>=3 and sum(t in d for d in doc_terms.values())<=2}
+        rare=max(2,len(records)//4)  # a party often has an agreement, an amendment and a renewal
+        distinctive={t for t in key & q if len(t)>=3 and sum(t in d for d in doc_terms.values())<=rare}
         # Before a counterparty is extracted, a distinctive file-name word that also occurs in the document's own
         # text names it too ("the Lark MTA" for "Lark Fictional Biosciences - Material Transfer Agreement.docx").
-        stem=set(terms(re.sub(r'\.[A-Za-z0-9]{1,5}$','',r.filename))) - {'fictional','example','demo','labs','lab','research','scanned','copy','final','signed','executed','draft'}
-        distinctive|={t for t in stem & q if len(t)>=3 and t in doc_terms[r.id] and sum(t in d for d in doc_terms.values())<=2}
+        name_words=set(terms(re.sub(r'\.[A-Za-z0-9]{1,5}$','',r.filename))) - {'fictional','example','demo','labs','lab','research','scanned','copy','final','signed','executed','draft'}
+        distinctive|={t for t in name_words & q if len(t)>=3 and t in doc_terms[r.id] and sum(t in d for d in doc_terms.values())<=rare}
         if (key and key<=q) or distinctive or r.filename.casefold() in question.casefold():named_ids.add(r.id)
     if named_ids:
         named_ids.update(r.id for r in records if r.parent_id in named_ids)

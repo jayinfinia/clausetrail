@@ -26,7 +26,7 @@ python -m eval.cuad_eval retrieval --cuad .local/cuad/data --split dev     # tun
 
 | Stage | What is measured | Result |
 |---|---|---|
-| Retrieval | Questions where the lawyer-annotated clause reaches the model | **89.5%** (1,244 questions), up from 55.2% before tuning |
+| Retrieval | Questions where the lawyer-annotated clause reaches the model | **90.2%** (1,244 questions), up from 55.2% at the first measurement |
 | Quote check | Fabricated or altered quotes accepted | **0 of 6,461** |
 | Quote check | Genuine quotes (verbatim or re-wrapped) rejected | **0 of 4,862** |
 | Redaction (rules only) | Injected SSNs, tax IDs, card and account numbers, birth dates caught | **100%** (1,326 values, 13 layouts) |
@@ -43,24 +43,26 @@ python -m eval.cuad_eval retrieval --cuad .local/cuad/data --split dev     # tun
 
 | System | Hit rate | All spans | Span recall | Median context sent |
 |---|---|---|---|---|
-| **Clausetrail (current)** | **89.5%** | **78.1%** | **78.3%** | 19,583 chars, 34 passages |
-| Clausetrail before tuning | 55.2% | 42.6% | 39.2% | 3,077 chars, 3 passages |
-| Same budget, first passages of the document | 55.5% | 50.2% | 49.1% | same as current |
-| Same budget, random passages | 50.6% | 39.1% | 39.5% | same as current |
+| **Clausetrail (current)** | **90.2%** | **79.0%** | **79.6%** | 19,638 chars, 34 passages |
+| Clausetrail before tuning | 58.2% | 45.2% | 42.0% | 3,157 chars, 3 passages |
+| Same budget, first passages of the document | 55.2% | 50.2% | 49.1% | same as current |
+| Same budget, random passages | 50.4% | 39.0% | 39.2% | same as current |
 
-**What changed, and why.** The first run showed two problems:
+**What changed, and why.** The first run showed two problems, and a live test with Claude later showed a third:
 
 1. **Unused budget.** Retrieval capped every document at 3 passages so that one repetitive agreement could not crowd out the others in a large collection. With a single contract in scope that cap left 85% of the budget empty. The cap now spreads the passage limit over the documents that matched: still 3 per document for large collections, more when few documents are in scope.
 2. **Front matter.** Titles, parties and dates sit at the top of a contract and rarely share words with the question. The opening 1,500 characters of each matched document are now reserved when few documents are in scope.
+
+3. **Word forms and repeat parties.** "expires" did not match "expire", and a party with several agreements (an MTA, its amendment and a renewal) stopped counting as a name, so a question naming it was not narrowed to its documents. Retrieval now applies light, consistent suffix stripping to questions and passages, and a party name counts as distinctive when it appears in up to a quarter of the collection. Measured the same way (dev first): dev 90.0% to 90.5%, test 89.5% to 90.2%. The before-tuning baselines moved too, because stemming applies to every configuration.
 
 Ablation on the same test questions, with settings chosen on dev first:
 
 | Setting | Dev hit rate | Test hit rate |
 |---|---|---|
-| Before tuning (3 per document, no opening) | 56.2% | 55.2% |
-| Spread cap, no reserved opening | 82.2% | 82.2% |
-| Spread cap, 3,000-character opening | 88.2% | 85.7% |
-| **Spread cap, 1,500-character opening (shipped)** | **90.0%** | **89.5%** |
+| Before tuning (3 per document, no opening) | 58.9% | 58.2% |
+| Spread cap, no reserved opening | 82.7% | 82.6% |
+| Spread cap, 3,000-character opening | 89.0% | 85.8% |
+| **Spread cap, 1,500-character opening (shipped)** | **90.5%** | **90.2%** |
 
 Dev and test agree within a point, so the choice was not fitted to the test set.
 
@@ -68,18 +70,18 @@ Dev and test agree within a point, so the choice was not fitted to the test set.
 
 | Category | Questions | Current | Before | First passages | Random |
 |---|---|---|---|---|---|
-| Non-Disparagement | 7 | 57.1 | 28.6 | 14.3 | 28.6 |
-| Revenue/Profit Sharing | 35 | 62.9 | 22.9 | 51.4 | 48.6 |
-| IP Ownership Assignment | 23 | 65.2 | 43.5 | 39.1 | 56.5 |
-| Affiliate License-Licensor | 6 | 66.7 | 50.0 | 33.3 | 50.0 |
-| Competitive Restriction Exception | 16 | 68.8 | 37.5 | 50.0 | 18.8 |
-| No-Solicit Of Employees | 10 | 70.0 | 40.0 | 40.0 | 70.0 |
-| Exclusivity | 33 | 72.7 | 33.3 | 63.6 | 39.4 |
-| Minimum Commitment | 32 | 78.1 | 40.6 | 56.2 | 59.4 |
-| Document Name | 102 | 82.4 | 28.4 | 85.3 | 52.9 |
-| Governing Law | 83 | 96.4 | 89.2 | 25.3 | 44.6 |
-| Parties | 102 | 100.0 | 26.5 | 100.0 | 65.7 |
-| Anti-Assignment | 72 | 100.0 | 86.1 | 31.9 | 54.2 |
+| No-Solicit Of Customers | 7 | 57.1 | 57.1 | 57.1 | 28.6 |
+| Non-Disparagement | 7 | 57.1 | 57.1 | 14.3 | 28.6 |
+| Revenue/Profit Sharing | 35 | 60.0 | 20.0 | 51.4 | 48.6 |
+| Affiliate License-Licensor | 6 | 66.7 | 16.7 | 33.3 | 50.0 |
+| Unlimited/All-You-Can-Eat-License | 3 | 66.7 | 33.3 | 66.7 | 66.7 |
+| Competitive Restriction Exception | 16 | 68.8 | 31.2 | 50.0 | 18.8 |
+| Volume Restriction | 17 | 70.6 | 17.6 | 58.8 | 47.1 |
+| Joint Ip Ownership | 7 | 71.4 | 42.9 | 0.0 | 28.6 |
+| Ip Ownership Assignment | 23 | 73.9 | 39.1 | 39.1 | 56.5 |
+| Governing Law | 83 | 97.6 | 90.4 | 25.3 | 44.6 |
+| Parties | 102 | 100.0 | 28.4 | 100.0 | 63.7 |
+| Anti-Assignment | 72 | 100.0 | 90.3 | 31.9 | 54.2 |
 
 The full table for all 41 categories is in `eval/results/retrieval.json`. The weak categories are the ones where the contract uses different words from the question ("shall not make any statement that disparages" vs "non-disparagement"; "royalty" vs "revenue sharing"). Lexical retrieval with a small synonym list cannot close that gap. The obvious next step is adding a local embedding model and fusing its ranking with the lexical one, measured on the same dev/test protocol.
 
@@ -129,6 +131,7 @@ The harness samples answerable and unanswerable CUAD test questions in equal num
 - **Declining is the strong side.** On 17 of 20 questions where CUAD says the contract has no such clause, the system said so rather than inventing one. The 3 that answered need manual review: a supported claim about a related clause (for example a general termination right when asked about termination for convenience) is counted here as a failure.
 - **Recall is the weak side.** 6 of 20 answerable questions ended as "insufficient evidence". Since retrieval reaches the annotated clause about 90% of the time (section 1), most of that loss happens after retrieval: the 7B model either did not propose a claim or its claim failed the quote or support check. That trade is deliberate (an abstention is safer than an unsupported answer), but it is the main thing to improve.
 - **Citation precision is a lower bound.** CUAD annotates the most relevant span; a correct citation of a related clause elsewhere counts as a miss.
+- **A harness artifact in this run.** CUAD's question descriptions capitalize clause names ("Non-Compete, Exclusivity"), and the app's unknown-party check read them as a company name and declined before retrieval. That affected 2 of these 40 questions (one answerable scored as a miss, one unanswerable scored as a correct abstention). The harness now lower-cases the descriptions, and the product check was fixed separately; the next run measures without it.
 - **Small sample.** 40 questions gives wide intervals (shown above). A 200-question run takes about 4 hours on the same laptop (this run averaged about 75 seconds per question including model loading) and is the next measurement.
 
 Next experiments, each measured the same way: a larger local model, splitting the support check from claim drafting across two different models so their errors are less correlated, and embedding retrieval for the vocabulary-mismatch categories in section 1.

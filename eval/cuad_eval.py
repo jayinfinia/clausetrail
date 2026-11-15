@@ -69,7 +69,9 @@ def load(data_dir, split='test'):
 
 def question_for(qa):
     """A plain-language question built from CUAD's category name and its 'Details' description."""
-    return f"What does the contract say about {qa['category'].lower()}? {qa['details']}"
+    # Lower-cased: CUAD's descriptions capitalize clause names ("Non-Compete, Exclusivity"), which the
+    # unknown-party check in grounded_qa would otherwise read as a company name and abstain on.
+    return f"What does the contract say about {qa['category'].lower()}? {qa['details'][:1].upper()}{qa['details'][1:].lower()}"
 
 
 def blocks_like_txt_parser(text):

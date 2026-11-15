@@ -13,6 +13,11 @@ from backend.db import Session, Job, Record, now, migrate
 from backend.services.extraction import model_extract, validate_value
 from backend import tagging
 import os
+import re
+from backend.services.parsers import MAX_PAGES
+
+class ParseFailed(Exception):
+    """The parser subprocess reported a content-free error code."""
 
 STOP = threading.Event()
 
@@ -51,7 +56,7 @@ def process_one():
             subprocess.run([sys.executable,'-m','backend.services.parsers',str(working),suffix,str(output)], check=True, timeout=180, capture_output=True)
             parsed=json.loads(output.read_text())
             if 'error' in parsed:
-                raise ValueError(parsed['error'])
+                raise ParseFailed(parsed['error'])
             proposals=model_extract(parsed['blocks'])
             tag_labels, tag_info = None, None
             if tagging.enabled():
@@ -71,6 +76,9 @@ def process_one():
             job, record=db.get(Job,jid),db.get(Record,rid)
             if record and not record.deleted:
                 record.blocks=parsed['blocks']; record.proposals=proposals; record.status='needs_review'
+                imported={'engine':parsed.get('engine',''),'warnings':parsed.get('warnings',[])[:20]}
+                if parsed.get('ocr_pages'): imported['ocr_pages']=parsed['ocr_pages'][:MAX_PAGES]
+                record.labels={**dict(record.labels or {}),'import':imported}
                 if tag_info:
                     new_labels = tagging.merge_labels(record.labels, tag_labels) if tag_labels else dict(record.labels or {})
                     new_labels['tagging'] = tag_info; record.labels = new_labels
@@ -78,10 +86,12 @@ def process_one():
             else:
                 job.status='cancelled'
             job.updated=now(); db.commit()
-    except Exception:
+    except Exception as exc:
+        # Parser codes are fixed, content-free strings; anything else gets a generic message.
+        code=str(exc) if isinstance(exc,ParseFailed) and re.fullmatch(r'[a-z0-9_]{3,80}',str(exc)) else 'processing_failed_check_format_or_local_model'
         with Session() as db:
             job,record=db.get(Job,jid),db.get(Record,rid)
-            job.status='failed'; job.error='processing_failed_check_format_or_local_model'; job.updated=now()
+            job.status='failed'; job.error=code; job.updated=now()
             if record and not record.deleted:
                 record.status='failed'
             db.commit()

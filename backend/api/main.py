@@ -25,7 +25,7 @@ from backend.redaction import llm as redaction_llm
 from backend import tagging
 from backend.auth import user, reviewer, USERS, require_record
 from backend.services.extraction import validate_value, model_status
-from backend.services.parsers import spreadsheet_rows
+from backend.services.parsers import spreadsheet_rows, tracker_columns, unsupported_message, SUPPORTED
 from backend.services.queries import deadlines
 from backend.services.grounded_qa import ask
 from backend.services import qa_provider
@@ -199,9 +199,16 @@ def redact_upload(data,name,rel_path,policy):
 
 def ingest(db,data,name,scope,actor,rel_path='',redaction_report=None):
     suffix=Path(name).suffix.lower()
-    if suffix not in ('.pdf','.docx','.xlsx','.csv','.txt'): raise ValueError('Unsupported file type')
-    if suffix=='.pdf' and not data.startswith(b'%PDF'): raise ValueError('Invalid PDF signature')
+    if suffix not in SUPPORTED: raise ValueError(unsupported_message(suffix))
+    if not data.strip(): raise ValueError('Empty file: there is no text to read')
+    if suffix=='.pdf' and b'%PDF' not in data[:1024]: raise ValueError('Invalid PDF signature')
+    if suffix in ('.docx','.xlsx') and data.startswith(b'\xd0\xcf\x11\xe0'):
+        raise ValueError('This Office file is password-protected or in a legacy format. Remove the password or save it as .docx or .xlsx, then import again.')
     if suffix in ('.docx','.xlsx') and not data.startswith(b'PK'): raise ValueError('Invalid Office signature')
+    tracker_headers=tracker_columns(data,suffix)
+    if tracker_headers:
+        raise ValueError(f'This looks like an agreement tracker (columns: {", ".join(tracker_headers[:4])}), so no agreement was created. '
+                         'Use "Reconcile an existing tracker" (Choose CSV or XLSX) on this page to compare it with the register.')
     digest=hashlib.sha256(data).hexdigest()
     existing=db.scalar(select(Record).where(Record.digest==digest,Record.scope==scope,Record.deleted==False))
     if existing: return {'id':existing.id,'duplicate':True,'filename':existing.filename}
